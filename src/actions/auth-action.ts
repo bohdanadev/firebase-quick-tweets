@@ -2,8 +2,10 @@
 import { redirect } from "next/navigation";
 
 export async function signup(prevState, formData) {
+  const username = formData.get("username");
   const email = formData.get("email");
   const password = formData.get("password");
+  const confirmPassword = formData.get("confirmPassword");
 
   let errors = {};
 
@@ -13,6 +15,10 @@ export async function signup(prevState, formData) {
 
   if (password.trim().length < 8) {
     errors.password = "Password must be at least 8 characters long.";
+  }
+
+  if (confirmPassword.trim() !== password.trim()) {
+    errors.confirmPassword = "Passwords must match!";
   }
 
   if (Object.keys(errors).length > 0) {
