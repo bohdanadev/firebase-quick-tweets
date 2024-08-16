@@ -14,29 +14,30 @@ import {
   ChatBubbleLeftEllipsisIcon as ChatIconFilled,
 } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface IProps {
   id: string;
-  //  post: any;
+  post: IPost;
   postPage: any;
 }
 
-const Post: FC<IProps> = ({ id, postPage }) => {
+const Post: FC<IProps> = ({ id, post, postPage }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [postId, setPostId] = useState("");
+  const [postId, setPostId] = useState<string>("");
   const [comments, setComments] = useState([]);
   const [likes, setLikes] = useState([]);
   const [liked, setLiked] = useState(false);
   const router = useRouter();
 
-  const post = {
-    id: "1",
-    username: "Me",
-    userImg: "assets/logo.png",
-    tag: "hello",
-    text: "The first Post",
-    image: "assets/me.jpg",
-  };
+  //const post = {
+  //  id: "1",
+  //  username: "Me",
+  //  userImg: "assets/logo.png",
+  //  tag: "hello",
+  //  text: "The first Post",
+  //  image: "assets/me.jpg",
+  //};
 
   return (
     <div
@@ -44,18 +45,22 @@ const Post: FC<IProps> = ({ id, postPage }) => {
       onClick={() => router.push(`/${id}`)}
     >
       {!postPage && (
-        <img
+        <Image
           src={post?.userImg}
-          alt="user"
+          alt=""
+          width={11}
+          height={11}
           className="h-11 w-11 rounded-full mr-4"
         />
       )}
       <div className="flex flex-col space-y-2 w-full">
         <div className={`flex ${!postPage && "justify-between"}`}>
           {postPage && (
-            <img
+            <Image
               src={post?.userImg}
               alt="Profile Pic"
+              width={11}
+              height={11}
               className="h-11 w-11 rounded-full mr-4"
             />
           )}
@@ -91,10 +96,12 @@ const Post: FC<IProps> = ({ id, postPage }) => {
         {postPage && (
           <p className="text-[#d9d9d9] mt-0.5 text-xl">{post?.text}</p>
         )}
-        <img
-          src={post?.image}
-          alt=""
-          className="rounded-2xl max-h-[700px] object-cover mr-2"
+        <Image
+          src={post.image}
+          alt="post"
+          sizes="30vw"
+          fill
+          className="rounded-2xl max-h-[700px] object-cover mr-2 position-relative"
         />
         <div
           className={`text-[#6e767d] flex justify-between w-10/12 ${
@@ -112,9 +119,9 @@ const Post: FC<IProps> = ({ id, postPage }) => {
             <div className="icon group-hover:bg-[#1d9bf0] group-hover:bg-opacity-10">
               <ChatBubbleOvalLeftEllipsisIcon className="h-5 group-hover:text-[#1d9bf0]" />
             </div>
-            {comments.length > 0 && (
+            {post.comments.length > 0 && (
               <span className="group-hover:text-[#1d9bf0] text-sm">
-                {comments.length}
+                {post.comments.length}
               </span>
             )}
           </div>
@@ -150,13 +157,13 @@ const Post: FC<IProps> = ({ id, postPage }) => {
                 <HeartIcon className="h-5 group-hover:text-pink-600" />
               )}
             </div>
-            {likes.length > 0 && (
+            {post.likes && post.likes.length > 0 && (
               <span
                 className={`group-hover:text-pink-600 text-sm ${
                   liked && "text-pink-600"
                 }`}
               >
-                {likes.length}
+                {post.likes.length}
               </span>
             )}
           </div>

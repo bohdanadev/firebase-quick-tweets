@@ -1,3 +1,4 @@
+import React from "react";
 import "../globals.css";
 
 export const metadata = {
@@ -6,12 +7,5 @@ export const metadata = {
 };
 
 export default function AuthRootLayout({ children }) {
-  return (
-    <>
-      <header id="auth-header">
-        <p>Welcome back!</p>
-      </header>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

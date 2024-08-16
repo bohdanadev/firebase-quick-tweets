@@ -4,19 +4,21 @@ import { auth } from "@/actions/auth-action";
 import Link from "next/link";
 import { useFormState } from "react-dom";
 import Image from "next/image";
+import logo from "@/assets/logo.png";
 import { H3Icon } from "@heroicons/react/24/outline";
 
 interface IProps {
   mode: string;
 }
+type initialFormState = {
+  user: { name: string; email: string } | null;
+  errors: {};
+};
 
 const AuthForm: FC<IProps> = ({ mode }) => {
   const [formState, formAction, isPending] = useFormState(
     auth.bind(null, mode),
-    {
-      message: "",
-      errors: null,
-    }
+    { user: null, errors: {} }
   );
   return (
     // <div className="max-w-md max-h-md mx-auto">
@@ -29,7 +31,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
         action={formAction}
         className="bg-stone-100 shadow-md w-full rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center justify-between gap-5"
       >
-        <Image src={"/assets/logo.png"} alt="logo" width={30} height={30} />
+        <Image src={logo} alt="logo" width={30} height={30} priority />
         {mode === "signup" ? (
           <h4 className="font-bold text-xl px-4">Create your account</h4>
         ) : (

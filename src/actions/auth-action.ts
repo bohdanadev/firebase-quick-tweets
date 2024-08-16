@@ -1,11 +1,12 @@
 "use server";
-import { redirect } from "next/navigation";
+import { createUser, signin } from "@/lib/user";
 
 export async function signup(prevState, formData) {
   const username = formData.get("username");
   const email = formData.get("email");
   const password = formData.get("password");
   const confirmPassword = formData.get("confirmPassword");
+  const avatarUrl = formData.get("avatarUrl");
 
   let errors = {};
 
@@ -26,14 +27,14 @@ export async function signup(prevState, formData) {
       errors,
     };
   }
-  return { message: "Signup", errors: null };
+  return await createUser(username, email, password, avatarUrl);
 }
 
 export async function login(prevState, formData) {
   const email = formData.get("email");
   const password = formData.get("password");
-
-  redirect("/posts");
+  const user = await signin(email, password);
+  return user;
 }
 
 export async function auth(mode, prevState, formData) {
@@ -43,6 +44,4 @@ export async function auth(mode, prevState, formData) {
   return await signup(prevState, formData);
 }
 
-export async function logout() {
-  redirect("/");
-}
+export async function logout() {}
