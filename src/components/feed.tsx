@@ -1,28 +1,29 @@
 "use client";
-import { SparklesIcon } from "@heroicons/react/24/outline";
-import Post from "./post";
+import { DivideIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { FC, useEffect, useState } from "react";
-import { onSnapshot, collection, query, orderBy } from "@firebase/firestore";
-import { db } from "../firebase";
 import PostInput from "./post-input";
+import { getPosts } from "@/lib/firebase/post";
+import { IComment, IPost, IUser } from "@/types";
+import PostsSection from "./posts-section";
+import { useAuth } from "@/context/auth-context";
 
-interface IProps {
-  currentUser: IUser;
-}
+const Feed: FC = () => {
+  const [initialPosts, setInitialPosts] = useState<IPost[]>([]);
+  const [comments, setComments] = useState<IComment[]>([]);
 
-const Feed: FC<IProps> = ({ currentUser }) => {
-  const [posts, setPosts] = useState<IPost[]>([]);
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const paginatedPosts: IPost[] = await getPosts(1);
+        console.log("PAGINAT", paginatedPosts);
+        setInitialPosts(paginatedPosts);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
 
-  useEffect(
-    () =>
-      onSnapshot(
-        query(collection(db, "posts"), orderBy("timestamp", "desc")),
-        (snapshot) => {
-          setPosts(snapshot.docs);
-        }
-      ),
-    [db]
-  );
+    fetchPosts();
+  }, []);
 
   return (
     <div className="flex-grow border-l border-r border-gray-700 max-w-2xl sm:ml-[73px] xl:ml-[370px]">
@@ -32,11 +33,9 @@ const Feed: FC<IProps> = ({ currentUser }) => {
           <SparklesIcon className="h-5 text-white" />
         </div>
       </div>
-      <PostInput currentUser={currentUser} />
+      <PostInput />
       <div className="pb-72">
-        {posts.map((post) => (
-          <Post key={post.id} id={post.id} post={post} postPage={"1"} />
-        ))}
+        <PostsSection initialPosts={initialPosts} userId="" />
       </div>
     </div>
   );

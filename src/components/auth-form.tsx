@@ -1,25 +1,87 @@
 "use client";
-import { FC } from "react";
-import { auth } from "@/actions/auth-action";
+import { FC, FormEvent, useEffect, useState } from "react";
+import { auth, login } from "@/actions/auth-action";
 import Link from "next/link";
 import { useFormState } from "react-dom";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
-import { H3Icon } from "@heroicons/react/24/outline";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import { getUser, signin } from "@/lib/firebase/user";
+import { app } from "@/lib/firebase/firebase";
 
 interface IProps {
   mode: string;
 }
-type initialFormState = {
-  user: { name: string; email: string } | null;
-  errors: {};
-};
 
 const AuthForm: FC<IProps> = ({ mode }) => {
-  const [formState, formAction, isPending] = useFormState(
-    auth.bind(null, mode),
-    { user: null, errors: {} }
-  );
+  // const [formState, formAction, isPending] = useFormState(
+  //   auth.bind(null, mode),
+  //   {
+  //     errors: {},
+  //   }
+  // );
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [profilePic, setProfilePic] = useState<string>("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState<boolean>(false);
+
+  //const { setAuthUserContext, setAuthContextNull } = useAuth();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const router = useRouter();
+
+  // const auth = getAuth(app);
+
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  //     if (user) {
+  //       const userFromDB = await getUser(user);
+  //       console.log("UserDB", userFromDB);
+  //
+  //       setAuthUserContext(userFromDB);
+  //     } else {
+  //       setAuthContextNull();
+  //       router.push("/?mode=login");
+  //     }
+  //   });
+  //   return () => unsubscribe();
+  // }, [auth, router]);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    //try {
+    //  const { error } = baseSchema.validate(
+    //    { email, password },
+    //    { abortEarly: false }
+    //  );
+    //  if (error) {
+    //    const errorObj: Record<string, string> = {};
+    //    error.details.forEach((detail) => {
+    //      errorObj[detail.path[0]] = detail.message;
+    //    });
+    //    setErrors(errorObj);
+    //  } else {
+    await signin(email, password);
+
+    //  setAuthUserContext(signedUser);
+    router.push("/posts");
+
+    //    setErrors({});
+    ///    }
+    ///  } catch (error) {
+    ///    toast.error(error.message);
+    ///    setErrors({});
+    ///  }
+    setLoading(false);
+  };
+
   return (
     // <div className="max-w-md max-h-md mx-auto">
     <div className="bg-black min-h-screen flex max-w-md mx-auto flex-col items-center justify-center">
@@ -28,7 +90,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
       </div>
       <div className="divider divider-accent text-slate-400">OR</div>
       <form
-        action={formAction}
+        onSubmit={handleSubmit}
+        //  action={formAction}
         className="bg-stone-100 shadow-md w-full rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center justify-between gap-5"
       >
         <Image src={logo} alt="logo" width={30} height={30} priority />
@@ -60,6 +123,14 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             />
           </label>
         )}
+        {mode === "signup" && (
+          <input
+            type="file"
+            className="file-input file-input-bordered file-input-sm w-full max-w-xs"
+            name="profilePic"
+            id="profilePic"
+          />
+        )}
 
         <label className="input input-bordered flex items-center gap-2">
           <svg
@@ -77,6 +148,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             placeholder="Email"
             name="email"
             id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </label>
@@ -100,6 +173,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             placeholder="password"
             name="password"
             id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </label>
@@ -128,22 +203,24 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             />
           </label>
         )}
-        {formState.errors && (
-          <ul id="form-errors">
-            {Object.keys(formState.errors).map((error) => (
-              <li className="text-error" key={error}>
-                {formState.errors[error]}
-              </li>
-            ))}
-          </ul>
-        )}
+
+        {/* {formState?.errors && ( 
+           <ul id="form-errors">
+             {Object.keys(formState?.errors).map((error) => (
+               <li className="text-error" key={error}> 
+                 {formState?.errors[error]}
+               </li>
+              ))} 
+           </ul>
+          )} */}
 
         <div className="flex items-center justify-between">
-          {isPending && (
+          {/* {isPending && (
             <button className="btn btn-square">
               <span className="loading loading-spinner"></span>
             </button>
-          )}
+          )} */}
+
           <button
             type="submit"
             className="btn btn-wide w-full text-lg bg-teal-300"

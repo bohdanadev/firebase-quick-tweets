@@ -1,6 +1,5 @@
+"use client";
 import { FC } from "react";
-import { getAuth, signOut } from "firebase/auth";
-import { firestore, app } from "@/lib/firebase";
 import Image from "next/image";
 import { HomeIcon } from "@heroicons/react/24/solid";
 import {
@@ -11,33 +10,16 @@ import {
   ClipboardDocumentListIcon,
   UserIcon,
   EllipsisHorizontalCircleIcon,
-  EllipsisHorizontalIcon,
+  ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import SidebarLink from "./sidebar-link";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import logo from "@/assets/logo.png";
+import { logout } from "@/actions/auth-action";
+import { useAuth } from "@/context/auth-context";
 
-interface IProps {
-  currentUser: IUser;
-}
-
-const Sidebar: FC<IProps> = ({ currentUser }) => {
-  const router = useRouter();
-  const auth = getAuth(app);
-
-  console.log(auth);
-
-  const logoutClick = async () => {
-    await signOut(auth)
-      .then(() => {
-        router.push("/?mode=login");
-      })
-      .catch((error: unknown) => {
-        console.error("Error logging out:", error);
-        throw new Error("Error logging out");
-      });
-  };
+const Sidebar: FC = () => {
+  const { user } = useAuth();
 
   return (
     <div className="hidden sm:flex flex-col items-center xl:items-start xl:w-[340px] p-2 fixed h-full">
@@ -56,25 +38,52 @@ const Sidebar: FC<IProps> = ({ currentUser }) => {
         <SidebarLink text="Profile" Icon={UserIcon} />
         <SidebarLink text="More" Icon={EllipsisHorizontalCircleIcon} />
       </div>
-      <button className="hidden xl:inline ml-auto bg-accent text-white rounded-full w-56 h-[52px] text-lg font-bold shadow-md hover:bg-[#1a8cd8]">
+      <button
+        className="hidden xl:inline ml-auto bg-[#1a8cd8] text-white rounded-full w-56 h-[52px] text-lg font-bold shadow-md hover:bg-accent"
+        // onClick={setIsOpen}
+      >
         Tweet
       </button>
-      <div
-        className="text-[#d9d9d9] flex items-center justify-center mt-auto hoverAnimation xl:ml-auto xl:-mr-5"
-        onClick={logoutClick}
-      >
-        <Image
-          src={currentUser.profilePhoto}
-          alt="user"
-          width={10}
-          height={10}
-          className="h-10 w-10 rounded-full xl:mr-2.5"
-        />
-        <div className="hidden xl:inline leading-5">
-          <h4 className="font-bold">{currentUser.username}</h4>
-          <p className="text-[#6e767d]">@{currentUser.tag}</p>
+      <div className="dropdown dropdown-top">
+        <div
+          tabIndex={0}
+          role="button"
+          className="text-[#d9d9d9] flex items-center justify-center mt-auto hoverAnimation xl:ml-auto xl:-mr-5"
+        >
+          {user?.profilePhoto ? (
+            <Image
+              src={user?.profilePhoto}
+              alt="user"
+              width={10}
+              height={10}
+              className="h-10 w-10 rounded-full xl:mr-2.5"
+            />
+          ) : (
+            <div className="avatar online placeholder">
+              <div className="bg-neutral text-neutral-content w-16 rounded-full">
+                <span className="text-xl">
+                  {user?.username.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            </div>
+          )}
+          <div className="hidden xl:inline leading-5 mx-2">
+            <h4 className="font-bold">{user?.username}</h4>
+          </div>
         </div>
-        <EllipsisHorizontalIcon className="h-5 hidden xl:inline ml-10" />
+        <ul
+          tabIndex={0}
+          className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+        >
+          <li>
+            <a href={`users/${user?.id}`}>Edit profile</a>
+          </li>
+          <li>
+            <a>
+              <div onClick={logout}>Logout</div>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   );

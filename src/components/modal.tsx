@@ -1,5 +1,4 @@
 "use client";
-import { modalState } from "@/lib/recoil-state/modal-atom";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -7,16 +6,14 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { FC, Fragment, useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
 import {
-  onSnapshot,
-  doc,
-  addDoc,
-  collection,
-  serverTimestamp,
-} from "@firebase/firestore";
-import { db } from "../firebase";
+  Dispatch,
+  FC,
+  Fragment,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import {
   CalendarIcon,
   ChartBarIcon,
@@ -25,36 +22,39 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Moment from "react-moment";
+import { IPost, IUser } from "@/types";
+import { createComment, showPost } from "@/actions/post-action";
+import { useAuth } from "@/context/auth-context";
 
 interface IProps {
-  currentUser: IUser;
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const Modal: FC<IProps> = ({ currentUser }) => {
-  const [isOpen, setIsOpen] = useRecoilState(modalState);
+const Modal: FC<IProps> = ({ isOpen, setIsOpen }) => {
   const [post, setPost] = useState<IPost | null>(null);
   const [postId, setPostId] = useState("");
   const [comment, setComment] = useState<string>("");
   const router = useRouter();
+  const { user } = useAuth();
 
-  useEffect(
-    () =>
-      onSnapshot(doc(db, "posts", postId), (snapshot) => {
-        setPost(snapshot.data());
-      }),
-    [db]
-  );
+  useEffect(() => {
+    async () => {
+      setPost(await showPost(postId));
+    };
+  }, [postId]);
 
   const sendComment = async (e) => {
     e.preventDefault();
 
-    await addDoc(collection(db, "posts", postId, "comments"), {
-      comment: comment,
-      username: currentUser.username,
-      tag: currentUser.tag,
-      userImg: currentUser.profilePhoto,
-      timestamp: serverTimestamp(),
-    });
+    await createComment(
+      postId,
+      comment,
+      user?.id,
+      user?.username,
+      user?.tag,
+      user?.profilePhoto ?? ""
+    );
 
     setIsOpen(false);
     setComment("");
@@ -64,7 +64,11 @@ const Modal: FC<IProps> = ({ currentUser }) => {
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" className="fixed z-50 inset-0 pt-8" onClose={setIsOpen}>
+      <Dialog
+        as="div"
+        className="fixed z-50 inset-0 pt-8"
+        onClose={() => setIsOpen(false)}
+      >
         <div className="flex items-start justify-center min-h-[800px] sm:min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <TransitionChild
             as={Fragment}
@@ -116,7 +120,7 @@ const Modal: FC<IProps> = ({ currentUser }) => {
                       </div>{" "}
                       ·{" "}
                       <span className="hover:underline text-sm sm:text-[15px]">
-                        <Moment fromNow>{post?.timestamp?.toDate()}</Moment>
+                        <Moment fromNow>{post?.timestamp}</Moment>
                       </span>
                       <p className="text-[#d9d9d9] text-[15px] sm:text-base">
                         {post?.text}
@@ -126,7 +130,7 @@ const Modal: FC<IProps> = ({ currentUser }) => {
 
                   <div className="mt-7 flex space-x-3 w-full">
                     <img
-                      src={currentUser.profilePhoto}
+                      src={user.profilePhoto}
                       alt=""
                       className="h-11 w-11 rounded-full"
                     />

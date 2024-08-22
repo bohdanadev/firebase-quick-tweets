@@ -1,15 +1,11 @@
-"use client";
 import { FC, useEffect, useState } from "react";
 import AuthForm from "@/components/auth-form";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import Feed from "@/components/feed";
-import Sidebar from "@/components/sidebar";
-import Widgets from "@/components/widgets";
-import { getUser } from "@/lib/user";
+import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
-import { RecoilRoot, useRecoilState } from "recoil";
-import { modalState } from "@/lib/recoil-state/modal-atom";
-import Modal from "@/components/modal";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app } from "@/lib/firebase/firebase";
+import { getUser } from "@/lib/firebase/user";
+import DataLoading from "./loading";
 
 interface IProps {
   searchParams: {
@@ -18,47 +14,30 @@ interface IProps {
 }
 
 const HomePage: FC<IProps> = ({ searchParams }) => {
-  const auth = getAuth(app);
-  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
-  const [isOpen, setIsOpen] = useRecoilState(modalState);
-  const router = useRouter();
   const formMode = searchParams.mode;
+  // const { user, setAuthUserContext, setAuthContextNull } = useAuth();
+  //  const [isOpen, setIsOpen] = useState<boolean>(false);
+  // const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const user = (await getUser(currentUser)) as IUser;
-        setCurrentUser(user);
-      } else {
-        setCurrentUser(null);
-        router.push("/?mode=login");
-      }
-    });
-    return () => unsubscribe();
-  }, [auth, router]);
+  // const auth = getAuth(app);
+  // console.log("Auth", auth);
+  //
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+  //     if (currentUser !== null) {
+  //       const user = await getUser(currentUser);
+  //       setAuthUserContext(user);
+  //     } else {
+  //       setAuthContextNull();
+  //       router.push("/?mode=login");
+  //     }
+  //   });
+  //   return () => unsubscribe();
+  // }, [auth, setAuthContextNull, setAuthUserContext, router]);
 
-  if (currentUser == null) return <div>Loading...</div>;
+  // if (user === null) return <DataLoading />;
 
   if (formMode) return <AuthForm mode={formMode} />;
-
-  return (
-    <div className="">
-      <div>
-        <h3>Home / QuickTweets</h3>
-      </div>
-
-      <div className="bg-black min-h-screen flex max-w-[1500px] mx-auto">
-        <Sidebar currentUser={currentUser} />
-        <Feed currentUser={currentUser} />
-        <Widgets />
-        {isOpen && (
-          <RecoilRoot>
-            <Modal currentUser={currentUser} />
-          </RecoilRoot>
-        )}
-      </div>
-    </div>
-  );
 };
 
 export default HomePage;

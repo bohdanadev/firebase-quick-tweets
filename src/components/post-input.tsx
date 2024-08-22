@@ -1,29 +1,20 @@
 import {
   CalendarIcon,
   ChartBarIcon,
-  EmojiHappyIcon,
-  PhotographIcon,
+  FaceSmileIcon,
+  PhotoIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ChangeEvent, FC, useRef, useState } from "react";
-import { db, storage } from "../firebase";
-import {
-  addDoc,
-  collection,
-  doc,
-  serverTimestamp,
-  updateDoc,
-} from "@firebase/firestore";
-import { getDownloadURL, ref, uploadString } from "@firebase/storage";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
-import "emoji-mart/css/emoji-mart.css";
+//import "emoji-mart/css/emoji-mart.css";
+import { IUser } from "@/types";
+import { createPost } from "@/actions/post-action";
+import me from "@/assets/me.jpg";
+import { useAuth } from "@/context/auth-context";
 
-interface IProps {
-  currentUser: IUser;
-}
-
-const PostInput: FC<IProps> = ({ currentUser }) => {
+const PostInput: FC = () => {
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<string | ArrayBuffer | null>(
@@ -31,30 +22,40 @@ const PostInput: FC<IProps> = ({ currentUser }) => {
   );
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const filePickerRef = useRef(null);
+  const { user } = useAuth();
 
   const sendPost = async () => {
     if (loading) return;
     setLoading(true);
-
-    const docRef = await addDoc(collection(db, "posts"), {
-      id: currentUser.id,
-      username: currentUser.username,
-      userImg: currentUser.profilePhoto,
-      tag: currentUser.tag,
-      text: input,
-      timestamp: serverTimestamp(),
-    });
-
-    const imageRef = ref(storage, `posts/${docRef.id}/image`);
-
-    if (selectedFile) {
-      await uploadString(imageRef, selectedFile, "data_url").then(async () => {
-        const downloadURL = await getDownloadURL(imageRef);
-        await updateDoc(doc(db, "posts", docRef.id), {
-          image: downloadURL,
-        });
-      });
+    if (user) {
+      await createPost(
+        user.id,
+        user.username,
+        user.profilePhoto || "",
+        input,
+        selectedFile
+      );
     }
+
+    //    const docRef = await addDoc(collection(db, "posts"), {
+    //      id: currentUser.id,
+    //      username: currentUser.username,
+    //      userImg: currentUser.profilePhoto,
+    //      tag: currentUser.tag,
+    //      text: input,
+    //      timestamp: serverTimestamp(),
+    //    });
+    //
+    //    const imageRef = ref(storage, `posts/${docRef.id}/image`);
+    //
+    //    if (selectedFile) {
+    //      await uploadString(imageRef, selectedFile, "data_url").then(async () => {
+    //        const downloadURL = await getDownloadURL(imageRef);
+    //        await updateDoc(doc(db, "posts", docRef.id), {
+    //          image: downloadURL,
+    //        });
+    //      });
+    //    }
 
     setLoading(false);
     setInput("");
@@ -87,11 +88,7 @@ const PostInput: FC<IProps> = ({ currentUser }) => {
         loading && "opacity-60"
       }`}
     >
-      <img
-        src={currentUser.profilePhoto}
-        alt=""
-        className="h-11 w-11 rounded-full cursor-pointer"
-      />
+      <img src={me} alt="" className="h-11 w-11 rounded-full cursor-pointer" />
       <div className="divide-y divide-gray-700 w-full">
         <div className={`${selectedFile && "pb-7"} ${input && "space-y-2.5"}`}>
           <textarea
@@ -127,7 +124,7 @@ const PostInput: FC<IProps> = ({ currentUser }) => {
                 className="icon"
                 onClick={() => filePickerRef.current.click()}
               >
-                <PhotographIcon className="text-[#1d9bf0] h-[22px]" />
+                <PhotoIcon className="text-[#1d9bf0] h-[22px]" />
                 <input
                   type="file"
                   ref={filePickerRef}
@@ -141,7 +138,7 @@ const PostInput: FC<IProps> = ({ currentUser }) => {
               </div>
 
               <div className="icon" onClick={() => setShowEmojis(!showEmojis)}>
-                <EmojiHappyIcon className="text-[#1d9bf0] h-[22px]" />
+                <FaceSmileIcon className="text-[#1d9bf0] h-[22px]" />
               </div>
 
               <div className="icon">

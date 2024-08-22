@@ -1,6 +1,7 @@
 "use client";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
+  ArrowsRightLeftIcon,
   ChartBarIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   EllipsisHorizontalIcon,
@@ -15,20 +16,36 @@ import {
 } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import {
+  deletePostWithComments,
+  likePost,
+  unlikePost,
+} from "@/lib/firebase/post";
+import { IComment, IPost, IUser } from "@/types";
+import { getComments } from "@/lib/firebase/comment";
+import { useAuth } from "@/context/auth-context";
+import {
+  deletePost,
+  likePostAction,
+  unlikePostAction,
+} from "@/actions/post-action";
+import Link from "next/link";
 
 interface IProps {
   id: string;
   post: IPost;
-  postPage: any;
+  user: IUser;
+  // postPage: number;
 }
 
-const Post: FC<IProps> = ({ id, post, postPage }) => {
+const Post: FC<IProps> = ({ id, post, user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [postId, setPostId] = useState<string>("");
-  const [comments, setComments] = useState([]);
-  const [likes, setLikes] = useState([]);
+  const [comments, setComments] = useState<IComment[]>([]);
   const [liked, setLiked] = useState(false);
   const router = useRouter();
+
+  console.log("USER", user);
 
   //const post = {
   //  id: "1",
@@ -39,12 +56,47 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
   //  image: "assets/me.jpg",
   //};
 
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        setComments(await getComments(id));
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+    fetchComments();
+  }, [id]);
+
+  useEffect(() => {
+    const isLike = post.likes.findIndex((like) => like === user.id) !== -1;
+    setLiked(isLike);
+  }, [post.likes, user.id]);
+
+  const likePostHandler = async () => {
+    if (!liked) {
+      await likePost(id, user.id);
+      if (!post.likes.includes(user.id)) {
+        post.likes.push(user.id);
+      }
+      setLiked(true);
+    } else {
+      await unlikePostAction(id, user.id);
+      post.likes.filter((like) => like !== user.id);
+      setLiked(false);
+    }
+  };
+
+  const deletePostHandler = async () => {
+    await deletePost(id);
+    router.push("/posts");
+  };
+
   return (
     <div
       className="p-3 flex cursor-pointer border-b border-gray-700"
-      onClick={() => router.push(`/${id}`)}
+      // onClick={() => router.push(`/${id}`)}
     >
-      {!postPage && (
+      {/* {!postPage && (
         <Image
           src={post?.userImg}
           alt=""
@@ -52,103 +104,98 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
           height={11}
           className="h-11 w-11 rounded-full mr-4"
         />
-      )}
+      )} */}
       <div className="flex flex-col space-y-2 w-full">
-        <div className={`flex ${!postPage && "justify-between"}`}>
-          {postPage && (
+        <Link href={`/users/${post.userId}`}>
+          <div className={`flex `}>
+            {/* {postPage && (   */}
             <Image
-              src={post?.userImg}
+              src={post.userImg}
               alt="Profile Pic"
               width={11}
               height={11}
               className="h-11 w-11 rounded-full mr-4"
             />
-          )}
-          <div className="text-[#6e767d]">
-            <div className="inline-block group">
-              <h4
-                className={`font-bold text-[15px] sm:text-base text-[#d9d9d9] group-hover:underline ${
-                  !postPage && "inline-block"
-                }`}
-              >
-                {post?.username}
-              </h4>
-              <span
-                className={`text-sm sm:text-[15px] ${!postPage && "ml-1.5"}`}
-              >
-                @{post?.tag}
+            {/*  )}    */}
+            <div className="text-[#6e767d]">
+              <div className="inline-block group">
+                <h4 className="font-bold text-[15px] sm:text-base text-[#d9d9d9] group-hover:underline">
+                  {post?.username}
+                </h4>
+              </div>
+              ·{" "}
+              <span className="hover:underline text-sm sm:text-[15px]">
+                <Moment fromNow>{post?.timestamp}</Moment>
               </span>
-            </div>
-            ·{" "}
-            <span className="hover:underline text-sm sm:text-[15px]">
-              <Moment fromNow>{post?.timestamp?.toDate()}</Moment>
-            </span>
-            {!postPage && (
+              {/*   {!postPage && (
               <p className="text-[#d9d9d9] text-[15px] sm:text-base mt-0.5">
                 {post?.text}
               </p>
-            )}
+            )} */}
+            </div>
+            <div className="icon group flex-shrink-0 ml-auto">
+              <EllipsisHorizontalIcon className="h-5 text-[#6e767d] group-hover:text-[#1d9bf0]" />
+            </div>
           </div>
-          <div className="icon group flex-shrink-0 ml-auto">
-            <EllipsisHorizontalIcon className="h-5 text-[#6e767d] group-hover:text-[#1d9bf0]" />
-          </div>
-        </div>
-        {postPage && (
-          <p className="text-[#d9d9d9] mt-0.5 text-xl">{post?.text}</p>
-        )}
+        </Link>
+        {/* {postPage && (  */}
+        <p className="text-[#d9d9d9] mt-0.5 text-xl">{post?.text}</p>
+        {/*  )}   */}
         <Image
           src={post.image}
           alt="post"
-          sizes="30vw"
-          fill
+          width={100}
+          height={100}
           className="rounded-2xl max-h-[700px] object-cover mr-2 position-relative"
         />
-        <div
-          className={`text-[#6e767d] flex justify-between w-10/12 ${
-            postPage && "mx-auto"
-          }`}
-        >
+        <div className={`text-[#6e767d] flex justify-between w-10/12 `}>
           <div
             className="flex items-center space-x-1 group"
             onClick={(e) => {
               e.stopPropagation();
-              setPostId(id);
+              // setPostId(id);
               setIsOpen(true);
             }}
           >
             <div className="icon group-hover:bg-[#1d9bf0] group-hover:bg-opacity-10">
               <ChatBubbleOvalLeftEllipsisIcon className="h-5 group-hover:text-[#1d9bf0]" />
             </div>
-            {post.comments.length > 0 && (
+            {comments.length > 0 && (
               <span className="group-hover:text-[#1d9bf0] text-sm">
-                {post.comments.length}
+                {comments.length}
               </span>
             )}
           </div>
 
+          {user.id === post.userId ? (
+            <div
+              className="flex items-center space-x-1 group"
+              onClick={
+                // e.stopPropagation();
+                //deleteDoc(doc(db, "posts", id));
+                deletePostHandler
+                // router.push("/posts");
+              }
+            >
+              <div className="icon group-hover:bg-red-600/10">
+                <TrashIcon className="h-5 group-hover:text-red-600" />
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1 group">
+              <div className="icon group-hover:bg-green-500/10">
+                <ArrowsRightLeftIcon className="h-5 group-hover:text-green-500" />
+              </div>
+            </div>
+          )}
+
           <div
             className="flex items-center space-x-1 group"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push("/");
-            }}
-          >
-            <div className="icon group-hover:bg-red-600/10">
-              <TrashIcon className="h-5 group-hover:text-red-600" />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-1 group">
-            <div className="icon group-hover:bg-green-500/10">
-              <ChartBarIcon className="h-5 group-hover:text-green-500" />
-            </div>
-          </div>
-
-          <div
-            className="flex items-center space-x-1 group"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
+            onClick={
+              likePostHandler
+              // e.stopPropagation();
+              // likePost(id);
+            }
           >
             <div className="icon group-hover:bg-pink-600/10">
               {liked ? (
