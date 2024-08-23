@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { FC } from "react";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import Head from "next/head";
@@ -11,6 +11,7 @@ import Comment from "@/components/comment";
 import Link from "next/link";
 import { getPost } from "@/lib/firebase/post";
 import { getComments } from "@/lib/firebase/comment";
+import { useUser } from "@/lib/getUser";
 
 interface IProps {
   params: {
@@ -19,14 +20,14 @@ interface IProps {
 }
 
 const PostPage: FC<IProps> = async ({ params: { id } }) => {
-  const { user } = useAuth();
+  const user = useUser();
   // const [isOpen, setIsOpen] = useState(false);
   // const [post, setPost] = useState<IPost | null>(null);
   // const [comments, setComments] = useState<IComment[]>([]);
-  const router = useRouter();
+  // const router = useRouter();
 
   const post = await getPost(id);
-  const comments = await getComments(id);
+  // const comments = await getComments(id);
 
   // useEffect(
   // () =>
@@ -48,7 +49,7 @@ const PostPage: FC<IProps> = async ({ params: { id } }) => {
   // [id]
   // );
 
-  if (!user) router.push("/?mode=login");
+  if (!user) redirect("/?mode=login");
 
   return (
     <div>
@@ -59,7 +60,7 @@ const PostPage: FC<IProps> = async ({ params: { id } }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="bg-black min-h-screen flex max-w-[1500px] mx-auto">
-        <Sidebar />
+        <Sidebar currentUser={user} />
         <div className="flex-grow border-l border-r border-gray-700 max-w-2xl sm:ml-[73px] xl:ml-[370px]">
           <div className="flex items-center px-1.5 py-2 border-b border-gray-700 text-[#d9d9d9] font-semibold text-xl gap-x-4 sticky top-0 z-50 bg-black">
             <Link
@@ -71,10 +72,10 @@ const PostPage: FC<IProps> = async ({ params: { id } }) => {
             Tweet
           </div>
 
-          <Post id={id} post={post} />
-          {comments.length > 0 && (
+          <Post id={id} post={post} user={user} />
+          {post.comments.length > 0 && (
             <div className="pb-72">
-              {comments.map((comment) => (
+              {post.comments.map((comment) => (
                 <Comment key={comment.id} id={comment.id} comment={comment} />
               ))}
             </div>

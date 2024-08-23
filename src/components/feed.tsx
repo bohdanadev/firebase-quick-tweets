@@ -6,10 +6,17 @@ import { getPosts } from "@/lib/firebase/post";
 import { IComment, IPost, IUser } from "@/types";
 import PostsSection from "./posts-section";
 import { useAuth } from "@/context/auth-context";
+import { User } from "firebase/auth";
+import { useUser } from "@/lib/getUser";
+
+//interface IProps {
+//  currentUser: User | null;
+//}
 
 const Feed: FC = () => {
   const [initialPosts, setInitialPosts] = useState<IPost[]>([]);
-  const [comments, setComments] = useState<IComment[]>([]);
+  // const [comments, setComments] = useState<IComment[]>([]);
+  const currentUser = useUser();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -33,9 +40,13 @@ const Feed: FC = () => {
           <SparklesIcon className="h-5 text-white" />
         </div>
       </div>
-      <PostInput />
+      <PostInput currentUser={currentUser} />
       <div className="pb-72">
-        <PostsSection initialPosts={initialPosts} userId="" />
+        <PostsSection
+          initialPosts={initialPosts}
+          userId=""
+          currentUser={currentUser}
+        />
       </div>
     </div>
   );

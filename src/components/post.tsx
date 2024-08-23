@@ -30,18 +30,19 @@ import {
   unlikePostAction,
 } from "@/actions/post-action";
 import Link from "next/link";
+import { User } from "firebase/auth";
 
 interface IProps {
   id: string;
   post: IPost;
-  user: IUser;
+  user: User | null;
   // postPage: number;
 }
 
 const Post: FC<IProps> = ({ id, post, user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [postId, setPostId] = useState<string>("");
-  const [comments, setComments] = useState<IComment[]>([]);
+  //const [comments, setComments] = useState<IComment[]>([]);
   const [liked, setLiked] = useState(false);
   const router = useRouter();
 
@@ -56,32 +57,33 @@ const Post: FC<IProps> = ({ id, post, user }) => {
   //  image: "assets/me.jpg",
   //};
 
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        setComments(await getComments(id));
-      } catch (error) {
-        console.error("Error fetching comments:", error);
-      }
-    };
-    fetchComments();
-  }, [id]);
+  // useEffect(() => {
+  //   const fetchComments = async () => {
+  //     try {
+  //       setComments(await getComments(id));
+  //     } catch (error) {
+  //       console.error("Error fetching comments:", error);
+  //     }
+  //   };
+  //   fetchComments();
+  // }, [id]);
 
   useEffect(() => {
-    const isLike = post.likes.findIndex((like) => like === user.id) !== -1;
+    const isLike = post.likes.findIndex((like) => like === user?.uid) !== -1;
     setLiked(isLike);
-  }, [post.likes, user.id]);
+  }, [post.likes, user?.uid]);
 
   const likePostHandler = async () => {
     if (!liked) {
-      await likePost(id, user.id);
-      if (!post.likes.includes(user.id)) {
-        post.likes.push(user.id);
+      await likePostAction(id, user?.uid!);
+      if (!post.likes.includes(user?.uid!)) {
+        post.likes.push(user?.uid!);
+        setLiked(true);
       }
       setLiked(true);
     } else {
-      await unlikePostAction(id, user.id);
-      post.likes.filter((like) => like !== user.id);
+      await unlikePostAction(id, user?.uid!);
+      post.likes.filter((like) => like !== user?.uid);
       setLiked(false);
     }
   };
@@ -112,8 +114,6 @@ const Post: FC<IProps> = ({ id, post, user }) => {
             <Image
               src={post.userImg}
               alt="Profile Pic"
-              width={11}
-              height={11}
               className="h-11 w-11 rounded-full mr-4"
             />
             {/*  )}    */}
@@ -144,8 +144,8 @@ const Post: FC<IProps> = ({ id, post, user }) => {
         <Image
           src={post.image}
           alt="post"
-          width={100}
-          height={100}
+          width={500}
+          height={450}
           className="rounded-2xl max-h-[700px] object-cover mr-2 position-relative"
         />
         <div className={`text-[#6e767d] flex justify-between w-10/12 `}>
@@ -160,14 +160,14 @@ const Post: FC<IProps> = ({ id, post, user }) => {
             <div className="icon group-hover:bg-[#1d9bf0] group-hover:bg-opacity-10">
               <ChatBubbleOvalLeftEllipsisIcon className="h-5 group-hover:text-[#1d9bf0]" />
             </div>
-            {comments.length > 0 && (
+            {post.comments.length > 0 && (
               <span className="group-hover:text-[#1d9bf0] text-sm">
-                {comments.length}
+                {post.comments.length}
               </span>
             )}
           </div>
 
-          {user.id === post.userId ? (
+          {user?.uid === post.userId ? (
             <div
               className="flex items-center space-x-1 group"
               onClick={

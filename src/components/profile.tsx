@@ -1,7 +1,8 @@
+import { FC, useEffect, useState } from "react";
 import { getUser } from "@/lib/firebase/user";
 import { IUser } from "@/types";
 import Image from "next/image";
-import { FC, useEffect, useState } from "react";
+import avatar from "@/assets/avatar.jpg";
 
 interface IProps {
   userId: string;
@@ -22,7 +23,7 @@ const Profile: FC<IProps> = async ({ userId }) => {
         <div className="avatar">
           <div className="w-24 rounded-full">
             <Image
-              src={user.profilePhoto}
+              src={user.profilePhoto ?? avatar}
               width={24}
               height={24}
               alt="User Avatar"

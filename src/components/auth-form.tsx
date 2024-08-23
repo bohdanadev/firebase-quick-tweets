@@ -9,14 +9,18 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  User,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getUser, signin } from "@/lib/firebase/user";
 import { app } from "@/lib/firebase/firebase";
+import GoogleAuth from "./google-auth";
+import { useUser } from "@/lib/getUser";
 
 interface IProps {
   mode: string;
+  // currentUser: User | null;
 }
 
 const AuthForm: FC<IProps> = ({ mode }) => {
@@ -35,6 +39,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
   //const { setAuthUserContext, setAuthContextNull } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const router = useRouter();
+
+  const currentUser = useUser();
 
   // const auth = getAuth(app);
 
@@ -86,7 +92,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
     // <div className="max-w-md max-h-md mx-auto">
     <div className="bg-black min-h-screen flex max-w-md mx-auto flex-col items-center justify-center">
       <div className="card bg-base-100 rounded-box grid h-10 place-items-center">
-        content
+        <GoogleAuth initialUser={currentUser} />
       </div>
       <div className="divider divider-accent text-slate-400">OR</div>
       <form

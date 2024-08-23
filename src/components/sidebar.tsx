@@ -10,16 +10,30 @@ import {
   ClipboardDocumentListIcon,
   UserIcon,
   EllipsisHorizontalCircleIcon,
-  ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import SidebarLink from "./sidebar-link";
 import Link from "next/link";
 import logo from "@/assets/logo.png";
 import { logout } from "@/actions/auth-action";
 import { useAuth } from "@/context/auth-context";
+import { getUser } from "@/lib/firebase/user";
+import { IUser } from "@/types";
+import { getAuthenticatedAppForUser } from "@/lib/firebase/server-app";
+import { User } from "firebase/auth";
+import { useUser } from "@/lib/getUser";
+
+//interface IProps {
+//  currentUser: User | null;
+//}
 
 const Sidebar: FC = () => {
-  const { user } = useAuth();
+  // const { user } = useAuth();
+  // const { currentUser } = await getAuthenticatedAppForUser();
+  const currentUser = useUser();
+
+  console.log("SIDEBAR", currentUser);
+
+  // const userDoc = await getUser(user!.uid);
 
   return (
     <div className="hidden sm:flex flex-col items-center xl:items-start xl:w-[340px] p-2 fixed h-full">
@@ -50,9 +64,9 @@ const Sidebar: FC = () => {
           role="button"
           className="text-[#d9d9d9] flex items-center justify-center mt-auto hoverAnimation xl:ml-auto xl:-mr-5"
         >
-          {user?.profilePhoto ? (
+          {currentUser?.photoURL ? (
             <Image
-              src={user?.profilePhoto}
+              src={currentUser?.photoURL}
               alt="user"
               width={10}
               height={10}
@@ -62,13 +76,13 @@ const Sidebar: FC = () => {
             <div className="avatar online placeholder">
               <div className="bg-neutral text-neutral-content w-16 rounded-full">
                 <span className="text-xl">
-                  {user?.username.charAt(0).toUpperCase()}
+                  {currentUser?.displayName?.charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
           )}
           <div className="hidden xl:inline leading-5 mx-2">
-            <h4 className="font-bold">{user?.username}</h4>
+            <h4 className="font-bold">{currentUser?.displayName}</h4>
           </div>
         </div>
         <ul
@@ -76,11 +90,11 @@ const Sidebar: FC = () => {
           className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
         >
           <li>
-            <a href={`users/${user?.id}`}>Edit profile</a>
+            <a href={`users/${currentUser?.uid}`}>Edit profile</a>
           </li>
           <li>
             <a>
-              <div onClick={logout}>Logout</div>
+              <div>Logout</div>
             </a>
           </li>
         </ul>

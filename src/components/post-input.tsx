@@ -11,10 +11,16 @@ import Picker from "@emoji-mart/react";
 //import "emoji-mart/css/emoji-mart.css";
 import { IUser } from "@/types";
 import { createPost } from "@/actions/post-action";
-import me from "@/assets/me.jpg";
+import avatar from "@/assets/avatar.jpg";
 import { useAuth } from "@/context/auth-context";
+import { User } from "firebase/auth";
+import Image from "next/image";
 
-const PostInput: FC = () => {
+interface IProps {
+  currentUser: User | null;
+}
+
+const PostInput: FC<IProps> = ({ currentUser }) => {
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<string | ArrayBuffer | null>(
@@ -22,16 +28,16 @@ const PostInput: FC = () => {
   );
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const filePickerRef = useRef(null);
-  const { user } = useAuth();
+  //const { user } = useAuth();
 
   const sendPost = async () => {
     if (loading) return;
     setLoading(true);
-    if (user) {
+    if (currentUser) {
       await createPost(
-        user.id,
-        user.username,
-        user.profilePhoto || "",
+        currentUser.uid,
+        currentUser.displayName || currentUser.uid,
+        currentUser.photoURL || "",
         input,
         selectedFile
       );
@@ -88,7 +94,13 @@ const PostInput: FC = () => {
         loading && "opacity-60"
       }`}
     >
-      <img src={me} alt="" className="h-11 w-11 rounded-full cursor-pointer" />
+      <Image
+        src={currentUser?.photoURL ?? avatar}
+        alt="avatar"
+        width={11}
+        height={11}
+        className="h-11 w-11 rounded-full cursor-pointer"
+      />
       <div className="divide-y divide-gray-700 w-full">
         <div className={`${selectedFile && "pb-7"} ${input && "space-y-2.5"}`}>
           <textarea

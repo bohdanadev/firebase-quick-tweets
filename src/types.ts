@@ -8,6 +8,7 @@ export interface IUser {
 }
 
 export interface IComment {
+  id: string;
   comment: string;
   userId: string;
   username: string;
