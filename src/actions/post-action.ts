@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
   addPost,
@@ -37,11 +36,10 @@ export async function createComment(
   comment: string,
   userId: string,
   username: string,
-  tag: string,
-  userImg: string
+  userImg: any
 ) {
   try {
-    await addComment(postId, comment, userId, username, tag, userImg);
+    await addComment(postId, comment, userId, username, userImg);
   } catch (error) {}
   revalidatePath("/posts", "page");
 }

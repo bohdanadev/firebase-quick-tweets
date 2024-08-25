@@ -1,10 +1,18 @@
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 
+export interface IAuth {
+  username: string;
+  profilePhoto: any;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export interface IUser {
   id: string;
   username: string;
   email: string;
-  profilePhoto?: string | StaticImport;
+  profilePhoto?: string | StaticImport | Blob | MediaSource;
 }
 
 export interface IComment {
@@ -12,7 +20,6 @@ export interface IComment {
   comment: string;
   userId: string;
   username: string;
-  tag: string;
   userImg: string;
   timestamp: any;
 }

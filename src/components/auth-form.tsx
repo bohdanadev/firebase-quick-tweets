@@ -1,103 +1,75 @@
 "use client";
-import { FC, FormEvent, useEffect, useState } from "react";
-import { auth, login } from "@/actions/auth-action";
+import { FC, useState } from "react";
 import Link from "next/link";
-import { useFormState } from "react-dom";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  User,
-} from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
-import { getUser, signin } from "@/lib/firebase/user";
-import { app } from "@/lib/firebase/firebase";
 import GoogleAuth from "./google-auth";
 import { useUser } from "@/lib/getUser";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { IAuth } from "@/types";
+import { joiResolver } from "@hookform/resolvers/joi";
+import {
+  baseSchema,
+  signupSchema,
+} from "@/lib/validators/auth-form.validation";
+import { createUser, signin } from "@/lib/firebase/user";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface IProps {
   mode: string;
-  // currentUser: User | null;
 }
 
 const AuthForm: FC<IProps> = ({ mode }) => {
-  // const [formState, formAction, isPending] = useFormState(
-  //   auth.bind(null, mode),
-  //   {
-  //     errors: {},
-  //   }
-  // );
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [profilePic, setProfilePic] = useState<string>("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+  let {
+    formState: { errors, isValid },
+    register,
+    handleSubmit,
+  } = useForm<IAuth>({
+    mode: "all",
+    resolver: joiResolver(mode === "signup" ? signupSchema : baseSchema),
+  });
 
-  //const { setAuthUserContext, setAuthContextNull } = useAuth();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const router = useRouter();
 
   const currentUser = useUser();
 
-  // const auth = getAuth(app);
+  const addAvatar = (e) => {
+    const reader = new FileReader();
+    if (e.target.files[0]) {
+      reader.readAsDataURL(e.target.files[0]);
+    }
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
-  //     if (user) {
-  //       const userFromDB = await getUser(user);
-  //       console.log("UserDB", userFromDB);
-  //
-  //       setAuthUserContext(userFromDB);
-  //     } else {
-  //       setAuthContextNull();
-  //       router.push("/?mode=login");
-  //     }
-  //   });
-  //   return () => unsubscribe();
-  // }, [auth, router]);
+    reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+      setSelectedFile(reader.result);
+    };
+  };
+  console.log("selected File", selectedFile);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    //try {
-    //  const { error } = baseSchema.validate(
-    //    { email, password },
-    //    { abortEarly: false }
-    //  );
-    //  if (error) {
-    //    const errorObj: Record<string, string> = {};
-    //    error.details.forEach((detail) => {
-    //      errorObj[detail.path[0]] = detail.message;
-    //    });
-    //    setErrors(errorObj);
-    //  } else {
-    await signin(email, password);
-
-    //  setAuthUserContext(signedUser);
+  const authLoginHandler: SubmitHandler<IAuth> = async (data) => {
+    await signin(data.email!, data.password!);
     router.push("/posts");
-
-    //    setErrors({});
-    ///    }
-    ///  } catch (error) {
-    ///    toast.error(error.message);
-    ///    setErrors({});
-    ///  }
-    setLoading(false);
+  };
+  const authSignupHandler: SubmitHandler<IAuth> = async (data) => {
+    try {
+      await createUser(data.username, selectedFile, data.email, data.password);
+      router.push("/posts");
+    } catch (error) {
+      console.error("Error registering user:", error);
+    }
   };
 
   return (
-    // <div className="max-w-md max-h-md mx-auto">
     <div className="bg-black min-h-screen flex max-w-md mx-auto flex-col items-center justify-center">
       <div className="card bg-base-100 rounded-box grid h-10 place-items-center">
         <GoogleAuth initialUser={currentUser} />
       </div>
       <div className="divider divider-accent text-slate-400">OR</div>
       <form
-        onSubmit={handleSubmit}
-        //  action={formAction}
+        onSubmit={handleSubmit(
+          mode === "login" ? authLoginHandler : authSignupHandler
+        )}
         className="bg-stone-100 shadow-md w-full rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center justify-between gap-5"
       >
         <Image src={logo} alt="logo" width={30} height={30} priority />
@@ -108,6 +80,19 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             Sign in to{" "}
             <span className="text text-teal-400 font-bold">QuickTweets</span>
           </h4>
+        )}
+
+        {errors.username && (
+          <div className="text-error">{errors.username?.message}</div>
+        )}
+        {errors.email && (
+          <div className="text-error"> {errors.email?.message}</div>
+        )}
+        {errors.password && (
+          <div className="text-error">{errors.password?.message}</div>
+        )}
+        {errors.confirmPassword && (
+          <div className="text-error">{errors.confirmPassword?.message}</div>
         )}
         {mode === "signup" && (
           <label className="input input-bordered flex items-center gap-2">
@@ -123,19 +108,44 @@ const AuthForm: FC<IProps> = ({ mode }) => {
               type="text"
               className="grow"
               placeholder="Username"
-              name="username"
+              {...register("username")}
               id="username"
               required
             />
           </label>
         )}
+
         {mode === "signup" && (
-          <input
-            type="file"
-            className="file-input file-input-bordered file-input-sm w-full max-w-xs"
-            name="profilePic"
-            id="profilePic"
-          />
+          <>
+            <label
+              htmlFor="profilePhoto"
+              className="flex gap-4 items-center text-light-1 cursor-pointer"
+            >
+              <p>Upload a photo</p>
+              {selectedFile && (
+                <div className="relative">
+                  <div
+                    className="absolute w-8 h-8 bg-[#15181c] hover:bg-[#272c26] bg-opacity-75 rounded-full flex items-center justify-center top-1 left-1 cursor-pointer"
+                    onClick={() => setSelectedFile(null)}
+                  >
+                    <XMarkIcon className="text-white h-5" />
+                  </div>
+                  <img
+                    src={selectedFile}
+                    alt=""
+                    className="rounded-2xl max-h-80 object-contain"
+                  />
+                </div>
+              )}
+            </label>
+            <input
+              type="file"
+              className="file-input file-input-bordered file-input-sm w-full max-w-xs"
+              id="profilePhoto"
+              {...register("profilePhoto")}
+              onChange={addAvatar}
+            />
+          </>
         )}
 
         <label className="input input-bordered flex items-center gap-2">
@@ -152,10 +162,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             type="text"
             className="grow"
             placeholder="Email"
-            name="email"
+            {...register("email")}
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </label>
@@ -177,10 +185,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             type="password"
             className="grow"
             placeholder="password"
-            name="password"
+            {...register("password")}
             id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </label>
@@ -203,30 +209,14 @@ const AuthForm: FC<IProps> = ({ mode }) => {
               type="password"
               className="grow"
               placeholder="confirmPassword"
-              name="confirmPassword"
+              {...register("confirmPassword")}
               id="confirmPassword"
               required
             />
           </label>
         )}
 
-        {/* {formState?.errors && ( 
-           <ul id="form-errors">
-             {Object.keys(formState?.errors).map((error) => (
-               <li className="text-error" key={error}> 
-                 {formState?.errors[error]}
-               </li>
-              ))} 
-           </ul>
-          )} */}
-
         <div className="flex items-center justify-between">
-          {/* {isPending && (
-            <button className="btn btn-square">
-              <span className="loading loading-spinner"></span>
-            </button>
-          )} */}
-
           <button
             type="submit"
             className="btn btn-wide w-full text-lg bg-teal-300"

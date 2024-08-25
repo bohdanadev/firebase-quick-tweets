@@ -5,22 +5,20 @@ import {
   PhotoIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { ChangeEvent, FC, useRef, useState } from "react";
+import { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 //import "emoji-mart/css/emoji-mart.css";
 import { IUser } from "@/types";
 import { createPost } from "@/actions/post-action";
 import avatar from "@/assets/avatar.jpg";
-import { useAuth } from "@/context/auth-context";
-import { User } from "firebase/auth";
 import Image from "next/image";
+import { useUser } from "@/lib/getUser";
+import { getUser } from "@/lib/firebase/user";
 
-interface IProps {
-  currentUser: User | null;
-}
+const PostInput: FC = () => {
+  const [userData, setUserData] = useState<IUser | null>(null);
 
-const PostInput: FC<IProps> = ({ currentUser }) => {
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<string | ArrayBuffer | null>(
@@ -28,7 +26,24 @@ const PostInput: FC<IProps> = ({ currentUser }) => {
   );
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const filePickerRef = useRef(null);
-  //const { user } = useAuth();
+
+  const currentUser = useUser();
+
+  useEffect(() => {
+    if (currentUser) {
+      const fetchUser = async () => {
+        const response = await getUser(currentUser.uid);
+        if (response) {
+          setUserData(response);
+        } else {
+          setUserData(null);
+        }
+      };
+      fetchUser();
+    }
+  }, [currentUser]);
+
+  const userAvatar = userData?.profilePhoto ?? avatar;
 
   const sendPost = async () => {
     if (loading) return;
@@ -36,32 +51,12 @@ const PostInput: FC<IProps> = ({ currentUser }) => {
     if (currentUser) {
       await createPost(
         currentUser.uid,
-        currentUser.displayName || currentUser.uid,
-        currentUser.photoURL || "",
+        currentUser.displayName ?? userData?.username,
+        currentUser.photoURL ?? userData?.profilePhoto,
         input,
         selectedFile
       );
     }
-
-    //    const docRef = await addDoc(collection(db, "posts"), {
-    //      id: currentUser.id,
-    //      username: currentUser.username,
-    //      userImg: currentUser.profilePhoto,
-    //      tag: currentUser.tag,
-    //      text: input,
-    //      timestamp: serverTimestamp(),
-    //    });
-    //
-    //    const imageRef = ref(storage, `posts/${docRef.id}/image`);
-    //
-    //    if (selectedFile) {
-    //      await uploadString(imageRef, selectedFile, "data_url").then(async () => {
-    //        const downloadURL = await getDownloadURL(imageRef);
-    //        await updateDoc(doc(db, "posts", docRef.id), {
-    //          image: downloadURL,
-    //        });
-    //      });
-    //    }
 
     setLoading(false);
     setInput("");
@@ -95,7 +90,7 @@ const PostInput: FC<IProps> = ({ currentUser }) => {
       }`}
     >
       <Image
-        src={currentUser?.photoURL ?? avatar}
+        src={currentUser?.photoURL ?? userAvatar}
         alt="avatar"
         width={11}
         height={11}

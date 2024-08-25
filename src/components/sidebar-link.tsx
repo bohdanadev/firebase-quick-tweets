@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 interface IProps {
   Icon: any;
   text: string;
-  active: boolean;
+  active?: boolean;
 }
 
 const SidebarLink: FC<IProps> = ({ Icon, text, active }) => {

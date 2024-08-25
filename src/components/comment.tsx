@@ -1,3 +1,4 @@
+"use client";
 import { IComment } from "@/types";
 import {
   ChartBarIcon,
@@ -9,6 +10,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
+import avatar from "@/assets/avatar.jpg";
 import Moment from "react-moment";
 
 interface IProps {
@@ -20,7 +22,7 @@ const Comment: FC<IProps> = ({ id, comment }) => {
   return (
     <div className="p-3 flex cursor-pointer border-b border-gray-700">
       <Image
-        src={comment?.userImg}
+        src={comment.userImg ?? avatar}
         alt=""
         width={11}
         height={11}
@@ -34,9 +36,6 @@ const Comment: FC<IProps> = ({ id, comment }) => {
                 <h4 className="font-bold text-[#d9d9d9] text-[15px] sm:text-base inline-block group-hover:underline">
                   {comment?.username}
                 </h4>
-                <span className="ml-1.5 text-sm sm:text-[15px]">
-                  @{comment?.tag}{" "}
-                </span>
               </div>
             </Link>{" "}
             ·{" "}

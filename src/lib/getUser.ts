@@ -1,19 +1,25 @@
 "use client";
 
-import { onAuthStateChanged, User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { auth } from "./firebase/firebase";
+import { useRouter } from "next/navigation";
 
 export const useUser = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const auth = getAuth();
+  const [user, setUser] = useState<any>();
+  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-      setUser(authUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+        router.push("/?mode=login");
+      }
     });
-
     return () => unsubscribe();
-  }, []);
+  }, [auth, router]);
 
   return user;
 };

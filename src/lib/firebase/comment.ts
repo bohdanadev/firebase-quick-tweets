@@ -16,8 +16,9 @@ export const getComments = async (postId: string) => {
   );
   return (await getDocs(q)).docs.map((doc) => {
     const id = doc.id;
-    const data = doc.data() as IComment;
-    return { id, ...data };
+    const data = doc.data() as Omit<IComment, "id">;
+    const timestamp = doc.data().timestamp.toDate();
+    return { id, ...data, timestamp };
   });
 };
 export const addComment = async (
@@ -25,15 +26,13 @@ export const addComment = async (
   comment: string,
   userId: string,
   username: string,
-  tag: string,
-  userImg: string
+  userImg: any
 ) => {
   await addDoc(collection(db, "posts", postId, "comments"), {
     comment,
     userId,
     username,
-    tag: tag,
-    userImg: userImg,
+    userImg,
     timestamp: serverTimestamp(),
   });
 };

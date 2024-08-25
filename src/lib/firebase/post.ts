@@ -17,8 +17,6 @@ import {
   where,
   QuerySnapshot,
   DocumentData,
-  Timestamp,
-  // OrderByDirection,
 } from "firebase/firestore";
 
 import { getDownloadURL, ref, uploadString } from "@firebase/storage";
@@ -41,36 +39,52 @@ function applyQueryFilters(q, { text, username }: FiltersType) {
 }
 
 export const getPosts = async (
-  pageNumber: number,
+  pageSize: number,
+  lastDoc?: DocumentData,
   userId?: string,
-  filters?: { text?: string; username?: string },
-  pageSize = 1
-  // sortOrder: OrderByDirection = "desc"
+  filters?: { text?: string; username?: string }
 ) => {
-  console.log("PAGENUMBER", pageNumber);
-  let q = query(
-    collection(db, "posts"),
-    orderBy("timestamp"),
-    limit(pageSize),
-    startAfter(pageNumber * pageSize)
-  );
-
-  if (userId) {
+  let q;
+  if (lastDoc) {
     q = query(
       collection(db, "posts"),
-      where("userId", "==", userId),
-      orderBy("timestamp"),
+      orderBy("timestamp", "desc"),
       limit(pageSize),
-      startAfter(pageNumber * pageSize)
+      startAfter(lastDoc)
     );
+  } else {
+    q = query(
+      collection(db, "posts"),
+      orderBy("timestamp", "desc"),
+      limit(pageSize)
+    );
+  }
+
+  if (userId) {
+    q = lastDoc
+      ? query(
+          collection(db, "posts"),
+          where("userId", "==", userId),
+          orderBy("timestamp", "desc"),
+          limit(pageSize),
+          startAfter(lastDoc)
+        )
+      : query(
+          collection(db, "posts"),
+          where("userId", "==", userId),
+          orderBy("timestamp", "desc"),
+          limit(pageSize)
+        );
   }
   if (filters) {
     q = applyQueryFilters(q, filters);
   }
   const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q);
-  console.log("Snap", querySnapshot);
-  const docsArray = querySnapshot.docs;
-  return docsArray.map((doc) => {
+
+  console.log("POSTS", querySnapshot);
+  const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+  const posts = querySnapshot.docs.map((doc) => {
     const id = doc.id;
     const data = doc.data() as Omit<IPost, "id">;
     const timestamp = doc.data().timestamp.toDate();
@@ -80,6 +94,7 @@ export const getPosts = async (
       timestamp,
     };
   });
+  return { posts, lastVisible };
 };
 
 export const addPost = async (
@@ -118,8 +133,9 @@ export const getPost = async (postId: string) => {
   if (docSnap.exists()) {
     const id = docSnap.id;
     const data = docSnap.data() as Omit<IPost, "id">;
-    console.log("Post-data from db:", data);
-    return { id, ...data };
+    const timestamp = docSnap.data().timestamp.toDate();
+
+    return { id, ...data, timestamp };
   } else {
     throw new Error("Document not found");
   }

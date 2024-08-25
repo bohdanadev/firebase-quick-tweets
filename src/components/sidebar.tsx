@@ -1,5 +1,5 @@
 "use client";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { HomeIcon } from "@heroicons/react/24/solid";
 import {
@@ -14,26 +14,44 @@ import {
 import SidebarLink from "./sidebar-link";
 import Link from "next/link";
 import logo from "@/assets/logo.png";
-import { logout } from "@/actions/auth-action";
-import { useAuth } from "@/context/auth-context";
-import { getUser } from "@/lib/firebase/user";
+import { deleteAccount, getUser, signout } from "@/lib/firebase/user";
 import { IUser } from "@/types";
-import { getAuthenticatedAppForUser } from "@/lib/firebase/server-app";
-import { User } from "firebase/auth";
 import { useUser } from "@/lib/getUser";
-
-//interface IProps {
-//  currentUser: User | null;
-//}
+import { useRouter } from "next/navigation";
 
 const Sidebar: FC = () => {
-  // const { user } = useAuth();
-  // const { currentUser } = await getAuthenticatedAppForUser();
+  const [userData, setUserData] = useState<IUser | null>(null);
+  const router = useRouter();
   const currentUser = useUser();
+
+  useEffect(() => {
+    if (currentUser) {
+      const fetchUser = async () => {
+        const response = await getUser(currentUser.uid);
+        if (response) {
+          setUserData(response);
+        } else {
+          setUserData(null);
+        }
+      };
+      fetchUser();
+    }
+  }, [currentUser]);
 
   console.log("SIDEBAR", currentUser);
 
-  // const userDoc = await getUser(user!.uid);
+  const logout = async () => {
+    await signout()
+      .then(() => {
+        router.push("/?mode=login");
+      })
+      .catch((error: unknown) => {
+        console.error("Error logging out:", error);
+        throw new Error("Error logging out");
+      });
+  };
+
+  const userAvatar = currentUser?.photoURL ?? userData?.profilePhoto;
 
   return (
     <div className="hidden sm:flex flex-col items-center xl:items-start xl:w-[340px] p-2 fixed h-full">
@@ -52,21 +70,16 @@ const Sidebar: FC = () => {
         <SidebarLink text="Profile" Icon={UserIcon} />
         <SidebarLink text="More" Icon={EllipsisHorizontalCircleIcon} />
       </div>
-      <button
-        className="hidden xl:inline ml-auto bg-[#1a8cd8] text-white rounded-full w-56 h-[52px] text-lg font-bold shadow-md hover:bg-accent"
-        // onClick={setIsOpen}
-      >
-        Tweet
-      </button>
+
       <div className="dropdown dropdown-top">
         <div
           tabIndex={0}
           role="button"
           className="text-[#d9d9d9] flex items-center justify-center mt-auto hoverAnimation xl:ml-auto xl:-mr-5"
         >
-          {currentUser?.photoURL ? (
+          {currentUser?.photoURL || userData?.profilePhoto ? (
             <Image
-              src={currentUser?.photoURL}
+              src={userAvatar}
               alt="user"
               width={10}
               height={10}
@@ -76,13 +89,16 @@ const Sidebar: FC = () => {
             <div className="avatar online placeholder">
               <div className="bg-neutral text-neutral-content w-16 rounded-full">
                 <span className="text-xl">
-                  {currentUser?.displayName?.charAt(0).toUpperCase()}
+                  {currentUser?.displayName?.charAt(0).toUpperCase() ??
+                    userData?.username.charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
           )}
           <div className="hidden xl:inline leading-5 mx-2">
-            <h4 className="font-bold">{currentUser?.displayName}</h4>
+            <h4 className="font-bold">
+              {currentUser?.displayName ?? userData?.username}
+            </h4>
           </div>
         </div>
         <ul
@@ -94,7 +110,14 @@ const Sidebar: FC = () => {
           </li>
           <li>
             <a>
-              <div>Logout</div>
+              <div onClick={() => deleteAccount(currentUser.uid)}>
+                Delete account
+              </div>
+            </a>
+          </li>
+          <li>
+            <a>
+              <div onClick={logout}>Logout</div>
             </a>
           </li>
         </ul>
