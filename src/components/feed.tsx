@@ -1,15 +1,16 @@
 "use client";
 import { SparklesIcon } from "@heroicons/react/24/outline";
-import { FC, useEffect, useState } from "react";
+import { FC, Suspense, useEffect, useState } from "react";
 import PostInput from "./post-input";
 import { getPosts } from "@/lib/firebase/post";
 import { IPost } from "@/types";
 import PostsSection from "./posts-section";
 import { useUser } from "@/lib/getUser";
 import { DocumentData } from "firebase/firestore";
+import DataLoading from "@/app/loading";
 
 const Feed: FC = () => {
-  const [initialPosts, setInitialPosts] = useState<IPost[]>([]);
+  const [initialPosts, setInitialPosts] = useState<IPost[] | null>(null);
   const [lastDoc, setLastDoc] = useState<DocumentData | null>(null);
   const { user: currentUser } = useUser();
 
@@ -40,7 +41,9 @@ const Feed: FC = () => {
       </div>
       <PostInput currentUser={currentUser} />
       {initialPosts && (
-        <PostsSection initialPosts={initialPosts} lastVisible={lastDoc} />
+        <Suspense fallback={<DataLoading />}>
+          <PostsSection initialPosts={initialPosts} lastVisible={lastDoc} />
+        </Suspense>
       )}
     </div>
   );

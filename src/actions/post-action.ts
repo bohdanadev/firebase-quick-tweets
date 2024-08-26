@@ -4,11 +4,12 @@ import { revalidatePath } from "next/cache";
 import {
   addPost,
   deletePostWithComments,
-  getPost,
   likePost,
   unlikePost,
+  updatePost,
 } from "@/lib/firebase/post";
 import { addComment } from "@/lib/firebase/comment";
+import { IFormData } from "@/types";
 
 export async function createPost(
   userId: string,
@@ -24,11 +25,7 @@ export async function createPost(
     // Handle errors
   }
 
-  revalidatePath("/posts", "page"); // Update cached posts
-}
-
-export async function showPost(postId: string) {
-  return await getPost(postId);
+  revalidatePath("/posts", "page");
 }
 
 export async function createComment(
@@ -40,8 +37,25 @@ export async function createComment(
 ) {
   try {
     await addComment(postId, comment, userId, username, userImg);
-  } catch (error) {}
-  revalidatePath("/posts", "page");
+    revalidatePath("/posts", "page");
+  } catch (error) {
+    throw new Error("Failed create post");
+  }
+}
+
+export async function editPost(
+  postId: string,
+  data: IFormData,
+  currentText: string,
+  currentImageUrl: string
+) {
+  try {
+    await updatePost(postId, data, currentText, currentImageUrl);
+    revalidatePath(`/posts/${postId}`, "page");
+    revalidatePath("/posts", "page");
+  } catch (error) {
+    throw new Error("Failed edit post");
+  }
 }
 
 export async function deletePost(postId: string) {

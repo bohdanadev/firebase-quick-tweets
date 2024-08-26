@@ -9,11 +9,11 @@ import {
 } from "firebase/auth";
 
 import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
 
 export const createUser = async (
   username: string,
-  profilePhoto: any,
+  selectedFile: any,
   email: string,
   password: string
 ) => {
@@ -23,20 +23,24 @@ export const createUser = async (
     password
   );
   const user = userCredential.user;
-  let avatarUrl = null;
-  if (profilePhoto) {
-    const profilePhotoRef = ref(storage, `profilePhotos/${user.uid}`);
-    await uploadBytes(profilePhotoRef, profilePhoto);
-    avatarUrl = await getDownloadURL(profilePhotoRef);
+  if (selectedFile) {
+    const profilePhotoRef = ref(
+      storage,
+      `profilePhotos/${user.uid}/profilePhoto`
+    );
+    await uploadString(profilePhotoRef, selectedFile, "data_url").then(
+      async () => {
+        const avatarUrl = await getDownloadURL(profilePhotoRef);
+        const docRef = doc(db, "users", user.uid);
+        return await setDoc(docRef, {
+          username,
+          profilePhoto: avatarUrl,
+          email: email,
+          status: "online",
+        });
+      }
+    );
   }
-
-  const docRef = doc(db, "users", user.uid);
-  return await setDoc(docRef, {
-    username,
-    profilePhoto: avatarUrl,
-    email: email,
-    status: "online",
-  });
 };
 
 export const signin = async (email: string, password: string) => {

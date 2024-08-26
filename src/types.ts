@@ -41,3 +41,8 @@ export interface IPost {
   comments: IComment[];
   likes: string[];
 }
+
+export interface IFormData {
+  text: string;
+  image?: FileList;
+}

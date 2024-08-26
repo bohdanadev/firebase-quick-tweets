@@ -5,6 +5,7 @@ import Post from "@/components/post";
 import { getPosts } from "@/lib/firebase/post";
 import { IPost } from "@/types";
 import { DocumentData } from "firebase/firestore";
+import DataLoading from "@/app/loading";
 
 interface IProps {
   initialPosts: IPost[];
@@ -17,6 +18,10 @@ const PostsSection: FC<IProps> = ({ initialPosts, lastVisible, userId }) => {
   const [lastDoc, setLastDoc] = useState<DocumentData>(lastVisible);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
+
+  console.log("INITIAL_POSTS", initialPosts);
+
+  console.log("POSTS", posts);
 
   const loadPosts = async () => {
     setLoading(true);
@@ -37,7 +42,7 @@ const PostsSection: FC<IProps> = ({ initialPosts, lastVisible, userId }) => {
     <div className="mt-4 pb-72">
       {posts &&
         posts.map((post) => <Post key={post.id} id={post.id} post={post} />)}
-      {loading && <p>Loading...</p>}
+      {loading && <DataLoading />}
       {!loading && hasMore && (
         <button className="btn btn-active btn-neutral" onClick={loadPosts}>
           Load more

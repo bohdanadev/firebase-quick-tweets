@@ -31,7 +31,7 @@ const PostEditForm: FC<IPostEditFormProps> = ({
   currentImageUrl,
   closeModal,
 }) => {
-  const { register, handleSubmit, setValue } = useForm<IFormData>();
+  const { register, handleSubmit, setValue, getValues } = useForm<IFormData>();
   const [loading, setLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -68,8 +68,15 @@ const PostEditForm: FC<IPostEditFormProps> = ({
     }
   };
 
-  const addEmoji = (emojiObject: any) => {
-    setValue("text", (prev) => (prev ?? "") + emojiObject.emoji, {
+  const addEmoji = (e: any) => {
+    let sym = e.unified.split("-");
+    let codesArray: any = [];
+    sym.forEach((el) => codesArray.push("0x" + el));
+    let emoji = String.fromCodePoint(...codesArray);
+    const currentValue = getValues("text");
+    const newValue = currentValue + emoji;
+
+    setValue("text", newValue, {
       shouldValidate: true,
     });
   };

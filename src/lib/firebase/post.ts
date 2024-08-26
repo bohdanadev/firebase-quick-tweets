@@ -1,4 +1,4 @@
-import { IPost } from "@/types";
+import { IFormData, IPost } from "@/types";
 import {
   collection,
   query,
@@ -17,9 +17,16 @@ import {
   where,
   QuerySnapshot,
   DocumentData,
+  deleteField,
 } from "firebase/firestore";
 
-import { getDownloadURL, ref, uploadString } from "@firebase/storage";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  uploadString,
+} from "@firebase/storage";
 import { db, storage } from "./firebase";
 
 type FiltersType = {
@@ -141,12 +148,34 @@ export const getPost = async (postId: string) => {
   }
 };
 
-export const updatePost = async (postId: string, data: IPost) => {
+export const updatePost = async (
+  postId: string,
+  data: IFormData,
+  currentText: string,
+  currentImageUrl: string
+) => {
   const postRef = doc(db, "posts", postId);
+  let updatedFields: { text?: string; imageUrl?: string | null } = {};
 
-  return await updateDoc(postRef, {
-    username: data.username,
-  });
+  if (data.text) {
+    updatedFields.text = data.text;
+  }
+
+  if (data.image && data.image.length > 0) {
+    const imageFile = data.image[0];
+    const imageRef = ref(storage, `posts/${postId}/${imageFile.name}`);
+    await uploadBytes(imageRef, imageFile);
+    const imageUrl = await getDownloadURL(imageRef);
+    updatedFields.imageUrl = imageUrl;
+  }
+
+  if (currentImageUrl && !data.image) {
+    const imageRef = ref(storage, currentImageUrl);
+    await deleteObject(imageRef);
+    updatedFields.imageUrl = deleteField();
+  }
+
+  return await updateDoc(postRef, updatedFields);
 };
 
 export const deletePostWithComments = async (postId: string) => {
