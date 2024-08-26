@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 const Sidebar: FC = () => {
   const [userData, setUserData] = useState<IUser | null>(null);
   const router = useRouter();
-  const currentUser = useUser();
+  const { user: currentUser } = useUser();
 
   useEffect(() => {
     if (currentUser) {

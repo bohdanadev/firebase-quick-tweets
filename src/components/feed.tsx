@@ -11,7 +11,7 @@ import { DocumentData } from "firebase/firestore";
 const Feed: FC = () => {
   const [initialPosts, setInitialPosts] = useState<IPost[]>([]);
   const [lastDoc, setLastDoc] = useState<DocumentData | null>(null);
-  const currentUser = useUser();
+  const { user: currentUser } = useUser();
 
   useEffect(() => {
     const fetchPosts = async () => {

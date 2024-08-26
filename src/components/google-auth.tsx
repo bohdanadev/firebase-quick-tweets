@@ -52,11 +52,6 @@ interface IProps {
 export const GoogleAuth: FC<IProps> = ({ initialUser }) => {
   // const user = useUserSession(initialUser);
 
-  // const handleSignOut = (e) => {
-  //   e.preventDefault();
-  //   signOut(auth);
-  // };
-
   const handleSignIn = (e) => {
     e.preventDefault();
     signInWithGoogle();

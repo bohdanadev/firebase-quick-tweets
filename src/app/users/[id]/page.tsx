@@ -26,11 +26,11 @@ const UserPage: FC<IProps> = async ({ params: { id } }) => {
       <div className="w-1/2 flex flex-col p-4">
         <Profile userId={id} />
 
-        <PostsSection
+        {/* <PostsSection
           initialPosts={initialPosts}
           userId={id}
-          lastVisible={lastVisible}
-        />
+          lastVisible={lastVisible}   
+        />*/}
       </div>
       <div className="w-1/4">
         <Widgets />

@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 
 export const useUser = () => {
   const auth = getAuth();
-  const [user, setUser] = useState<any>();
+  const [user, setUser] = useState<User | null>();
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -17,9 +18,10 @@ export const useUser = () => {
         setUser(null);
         router.push("/?mode=login");
       }
+      setLoading(false);
     });
     return () => unsubscribe();
   }, [auth, router]);
 
-  return user;
+  return { user, loading };
 };

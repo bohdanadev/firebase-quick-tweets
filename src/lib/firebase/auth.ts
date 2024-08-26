@@ -2,6 +2,12 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged as _onAuthStateChanged,
+  getAuth,
+  sendPasswordResetEmail,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  signInAnonymously,
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -26,3 +32,41 @@ export async function signOut() {
     console.error("Error signing out with Google", error);
   }
 }
+
+export const forgotPassword = async (email: string) => {
+  const auth = getAuth();
+  sendPasswordResetEmail(auth, email)
+    .then(() => {
+      console.log("Password reset email sent!");
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+    });
+};
+
+export const changePassword = async (newPassword: string) => {
+  const auth = getAuth();
+
+  const user = auth.currentUser;
+  if (user) {
+    await updatePassword(user, newPassword)
+      .then(() => {
+        console.log(" Update successful.");
+        signOut();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+};
+
+export const reauth = async (password: string) => {
+  const auth = getAuth();
+
+  const user = auth.currentUser;
+  if (user) {
+    const credential = EmailAuthProvider.credential(user.email!, password);
+    await reauthenticateWithCredential(user, credential);
+  }
+};

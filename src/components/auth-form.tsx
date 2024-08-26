@@ -33,7 +33,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
 
   const router = useRouter();
 
-  const currentUser = useUser();
+  const { user: currentUser } = useUser();
 
   const addAvatar = (e) => {
     const reader = new FileReader();
@@ -226,15 +226,25 @@ const AuthForm: FC<IProps> = ({ mode }) => {
         </div>
         <div>
           {mode === "login" && (
-            <p className="text-sm text-gray-700">
-              <Link
-                href="/?mode=signup"
-                className="btn btn-active btn-link text-md p-1 m-0"
-              >
-                Create
-              </Link>
-              an account.
-            </p>
+            <>
+              <div className="mt-4 text-center">
+                <Link
+                  href="/forgot-password"
+                  className="text-blue-500 hover:underline"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+              <p className="text-sm text-gray-700">
+                <Link
+                  href="/?mode=signup"
+                  className="btn btn-active btn-link text-md p-1 m-0"
+                >
+                  Create
+                </Link>
+                an account.
+              </p>
+            </>
           )}
           {mode === "signup" && (
             <p className="text-sm text-gray-700">

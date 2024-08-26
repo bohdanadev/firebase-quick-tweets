@@ -8,6 +8,12 @@ export interface IAuth {
   confirmPassword: string;
 }
 
+export interface IChangePassword {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
 export interface IUser {
   id: string;
   username: string;

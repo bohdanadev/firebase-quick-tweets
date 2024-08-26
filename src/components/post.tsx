@@ -43,7 +43,7 @@ const Post: FC<IProps> = ({ id, post, searchParams, postPage }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [comments, setComments] = useState<IComment[]>([]);
   const router = useRouter();
-  const user = useUser();
+  const { user } = useUser();
   const show = searchParams?.show;
   const target = searchParams?.target;
 

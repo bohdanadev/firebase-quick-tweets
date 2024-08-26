@@ -27,7 +27,7 @@ const PostInput: FC = () => {
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const filePickerRef = useRef(null);
 
-  const currentUser = useUser();
+  const { user: currentUser } = useUser();
 
   useEffect(() => {
     if (currentUser) {

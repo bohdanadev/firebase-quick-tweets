@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import Post from "@/components/post";
 import { getPosts } from "@/lib/firebase/post";
 import { IPost } from "@/types";
