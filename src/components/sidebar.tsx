@@ -18,6 +18,7 @@ import { deleteAccount, getUser, signout } from "@/lib/firebase/user";
 import { IUser } from "@/types";
 import { useUser } from "@/lib/getUser";
 import { useRouter } from "next/navigation";
+import avatar from "@/assets/avatar.jpg";
 
 const Sidebar: FC = () => {
   const [userData, setUserData] = useState<IUser | null>(null);
@@ -51,13 +52,15 @@ const Sidebar: FC = () => {
       });
   };
 
-  const userAvatar = currentUser?.photoURL ?? userData?.profilePhoto;
+  const userAvatar = currentUser?.photoURL
+    ? currentUser.photoURL
+    : userData?.profilePhoto ?? avatar;
 
   return (
     <div className="hidden sm:flex flex-col items-center xl:items-start xl:w-[340px] p-2 fixed h-full">
       <div className="flex items-center justify-center w-14 h-14 hoverAnimation p-0 xl:ml-24">
-        <Link href="/">
-          <Image src={logo} width={30} height={30} priority alt="logo" />
+        <Link href="/posts">
+          <Image src={logo} width={100} height={100} priority alt="logo" />
         </Link>
       </div>
       <div className="space-y-2.5 mt-4 mb-2.5 xl:ml-24">
@@ -71,7 +74,7 @@ const Sidebar: FC = () => {
         <SidebarLink text="More" Icon={EllipsisHorizontalCircleIcon} />
       </div>
 
-      <div className="dropdown dropdown-top">
+      <div className="dropdown dropdown-top xl:ml-24">
         <div
           tabIndex={0}
           role="button"
@@ -81,9 +84,9 @@ const Sidebar: FC = () => {
             <Image
               src={userAvatar}
               alt="user"
-              width={10}
-              height={10}
-              className="h-10 w-10 rounded-full xl:mr-2.5"
+              width={20}
+              height={20}
+              className="h-20 w-20 rounded-full xl:mr-2.5"
             />
           ) : (
             <div className="avatar online placeholder">
@@ -103,14 +106,14 @@ const Sidebar: FC = () => {
         </div>
         <ul
           tabIndex={0}
-          className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+          className="dropdown-content menu bg-neutral-content rounded-box z-[1] w-52 p-2 shadow"
         >
           <li>
             <a href={`users/${currentUser?.uid}`}>Edit profile</a>
           </li>
           <li>
             <a>
-              <div onClick={() => deleteAccount(currentUser.uid)}>
+              <div onClick={() => deleteAccount(currentUser!.uid)}>
                 Delete account
               </div>
             </a>

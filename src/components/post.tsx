@@ -40,6 +40,7 @@ interface IProps {
 
 const Post: FC<IProps> = ({ id, post, searchParams, postPage }) => {
   const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(post.likes);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [comments, setComments] = useState<IComment[]>([]);
   const router = useRouter();
@@ -61,14 +62,14 @@ const Post: FC<IProps> = ({ id, post, searchParams, postPage }) => {
 
   const likePostHandler = async () => {
     if (!liked) {
-      await likePostAction(id, user?.uid);
-      if (!post.likes.includes(user?.uid)) {
-        post.likes.push(user?.uid);
+      await likePostAction(id, user?.uid!);
+      if (!likes.includes(user?.uid!)) {
+        setLikes((prevState) => [...prevState, user?.uid!]);
         setLiked(true);
       }
     } else {
-      await unlikePostAction(id, user?.uid);
-      post.likes.filter((like) => like !== user?.uid);
+      await unlikePostAction(id, user?.uid!);
+      setLikes((prevState) => prevState.filter((like) => like !== user?.uid));
       setLiked(false);
     }
   };
@@ -179,13 +180,13 @@ const Post: FC<IProps> = ({ id, post, searchParams, postPage }) => {
                 <HeartIcon className="h-5 group-hover:text-pink-600" />
               )}
             </div>
-            {post.likes && post.likes.length > 0 && (
+            {likes && likes.length > 0 && (
               <span
                 className={`group-hover:text-pink-600 text-sm ${
                   liked && "text-pink-600"
                 }`}
               >
-                {post.likes.length}
+                {likes.length}
               </span>
             )}
           </div>

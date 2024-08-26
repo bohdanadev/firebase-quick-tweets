@@ -22,7 +22,7 @@ export async function createPost(
   try {
     await addPost(userId, username, profilePhoto, input, selectedFile);
   } catch (error) {
-    // Handle errors
+    throw new Error("Create post failed");
   }
 
   revalidatePath("/posts", "page");

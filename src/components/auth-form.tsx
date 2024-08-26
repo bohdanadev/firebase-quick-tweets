@@ -45,7 +45,6 @@ const AuthForm: FC<IProps> = ({ mode }) => {
       setSelectedFile(reader.result);
     };
   };
-  console.log("selected File", selectedFile);
 
   const authLoginHandler: SubmitHandler<IAuth> = async (data) => {
     await signin(data.email!, data.password!);
@@ -54,7 +53,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
   const authSignupHandler: SubmitHandler<IAuth> = async (data) => {
     try {
       await createUser(data.username, selectedFile, data.email, data.password);
-      router.push("/posts");
+      router.push("/?mode=login");
     } catch (error) {
       console.error("Error registering user:", error);
     }

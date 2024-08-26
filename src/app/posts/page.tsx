@@ -8,10 +8,6 @@ import DataLoading from "../loading";
 const PostsPage: FC = async () => {
   return (
     <div className="">
-      <div>
-        <h3>QuickTweets</h3>
-      </div>
-
       <div className="bg-black min-h-screen flex max-w-[1500px] mx-auto">
         <Sidebar />
         <Suspense fallback={<DataLoading />}>

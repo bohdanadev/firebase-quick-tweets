@@ -6,6 +6,8 @@ import { IChangePassword } from "@/types";
 import { changePassword, reauth } from "@/lib/firebase/auth";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/getUser";
+import changePasswordSchema from "@/lib/validators/change-password-form.validation";
+import { joiResolver } from "@hookform/resolvers/joi";
 
 const ChangePassword: FC = () => {
   const {
@@ -13,7 +15,10 @@ const ChangePassword: FC = () => {
     handleSubmit,
     formState: { errors, isValid },
     reset,
-  } = useForm<IChangePassword>();
+  } = useForm<IChangePassword>({
+    mode: "all",
+    resolver: joiResolver(changePasswordSchema),
+  });
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
   const router = useRouter();

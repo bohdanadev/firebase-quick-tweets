@@ -44,7 +44,10 @@ const PostsSection: FC<IProps> = ({ initialPosts, lastVisible, userId }) => {
         posts.map((post) => <Post key={post.id} id={post.id} post={post} />)}
       {loading && <DataLoading />}
       {!loading && hasMore && (
-        <button className="btn btn-active btn-neutral" onClick={loadPosts}>
+        <button
+          className="btn btn-active btn-neutral w-full mx-auto bg-black mt-4 border-none"
+          onClick={loadPosts}
+        >
           Load more
         </button>
       )}

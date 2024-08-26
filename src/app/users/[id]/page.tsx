@@ -18,12 +18,12 @@ const UserPage: FC<IProps> = async ({ params: { id } }) => {
   });
 
   return (
-    <div className="flex h-screen bg-base-100">
+    <div className="bg-black min-h-screen flex max-w-[1500px] mx-auto">
       <div className="w-1/4">
         <Sidebar />
       </div>
 
-      <div className="w-1/2 flex flex-col p-4">
+      <div className="w-1/2 flex p-4 flex-grow border-l border-r border-gray-700">
         <Profile userId={id} />
 
         {/* <PostsSection
@@ -32,7 +32,7 @@ const UserPage: FC<IProps> = async ({ params: { id } }) => {
           lastVisible={lastVisible}   
         />*/}
       </div>
-      <div className="w-1/4">
+      <div className="w-1/4 ml-4">
         <Widgets />
       </div>
     </div>

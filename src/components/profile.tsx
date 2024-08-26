@@ -30,14 +30,14 @@ const Profile: FC<IProps> = ({ userId, searchParams }) => {
 
   const userPhoto = user?.profilePhoto ?? avatar;
   return (
-    <div className="card w-full bg-base-200 shadow-xl p-4">
+    <div className="card w-full bg-black shadow-xl p-4">
       <div className="flex items-center">
         <div className="avatar">
           <div className="w-24 rounded-full">
             <Image
               src={currentUser?.photoURL ?? userPhoto}
-              width={24}
-              height={24}
+              width={500}
+              height={500}
               alt="User Avatar"
             />
           </div>
@@ -46,12 +46,12 @@ const Profile: FC<IProps> = ({ userId, searchParams }) => {
           <h2 className="text-2xl font-bold">
             {currentUser?.displayName ?? user?.username}
           </h2>
-          <div className="flex flex-row">
+          <div className="flex flex-row gap-5">
             <Link href={`/users/${userId}?show=true&target=profile`}>
-              <div className="btn btn-wide">Edit Profile</div>
+              <div className="btn btn-neutral">Edit Profile</div>
             </Link>
             <Link href={`/users/change-password`}>
-              <div className="btn btn-wide">Change Password</div>
+              <div className="btn btn-neutral">Change Password</div>
             </Link>
           </div>
         </div>

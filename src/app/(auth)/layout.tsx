@@ -6,6 +6,10 @@ export const metadata = {
   description: "Firebase Authentication",
 };
 
-export default function AuthRootLayout({ children }) {
-  return <>{children}</>;
+export default function AuthRootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return { children };
 }

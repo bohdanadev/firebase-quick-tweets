@@ -3,9 +3,10 @@ import { IUser } from "@/types";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  User,
   signOut,
   getAuth,
+  sendEmailVerification,
+  updateProfile,
 } from "firebase/auth";
 
 import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
@@ -23,6 +24,7 @@ export const createUser = async (
     password
   );
   const user = userCredential.user;
+  sendEmailVerification(user);
   if (selectedFile) {
     const profilePhotoRef = ref(
       storage,
@@ -65,9 +67,8 @@ export const getUser = async (uid: string) => {
   }
 };
 
-const updateProfile = async (id: string, data: IUser) => {
-  const auth = getAuth();
-  updateProfile(auth.currentUser, {
+const updateMyProfile = async (id: string, data: IUser) => {
+  updateProfile(auth.currentUser!, {
     displayName: data.username,
     photoURL: data.profilePhoto,
   })
@@ -89,7 +90,6 @@ const updateProfile = async (id: string, data: IUser) => {
 };
 
 export const deleteAccount = async (id: string) => {
-  const auth = getAuth();
   await auth.currentUser?.delete();
   await deleteDoc(doc(db, "users", id));
 };
