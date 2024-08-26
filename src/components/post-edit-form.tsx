@@ -9,20 +9,16 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { db, storage } from "@/lib/firebase/firebase";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
+import { IFormData } from "@/types";
 
 interface IPostEditFormProps {
   postId: string;
   currentText: string;
   currentImageUrl: string;
   closeModal: () => void;
-}
-
-interface IFormData {
-  text: string;
-  image?: FileList;
 }
 
 const PostEditForm: FC<IPostEditFormProps> = ({
@@ -35,7 +31,7 @@ const PostEditForm: FC<IPostEditFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const onSubmit = async (data: IFormData) => {
+  const onSubmit: SubmitHandler<IFormData> = async (data) => {
     setLoading(true);
     try {
       const postRef = doc(db, "posts", postId);
