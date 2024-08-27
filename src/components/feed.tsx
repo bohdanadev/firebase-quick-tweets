@@ -29,7 +29,7 @@ const Feed: FC = () => {
     fetchPosts();
   }, []);
 
-  console.log("INITIAL", initialPosts);
+  const serializedLastVisible = lastDoc ? JSON.stringify(lastDoc) : null;
 
   return (
     <div className="flex-grow border-l border-r border-gray-700 max-w-2xl sm:ml-[73px] xl:ml-[370px]">
@@ -42,7 +42,10 @@ const Feed: FC = () => {
       <PostInput currentUser={currentUser} />
       {initialPosts && (
         <Suspense fallback={<DataLoading />}>
-          <PostsSection initialPosts={initialPosts} lastVisible={lastDoc} />
+          <PostsSection
+            initialPosts={initialPosts}
+            lastVisible={serializedLastVisible}
+          />
         </Suspense>
       )}
     </div>

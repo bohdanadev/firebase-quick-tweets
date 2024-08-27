@@ -10,20 +10,25 @@ import { IUser } from "@/types";
 
 interface IProps {
   userId: string;
-  searchParams?: Record<string, string> | null | undefined;
+  // searchParams?: Record<string, string> | null | undefined;
 }
 
-const Profile: FC<IProps> = ({ userId, searchParams }) => {
+const Profile: FC<IProps> = ({ userId }) => {
   const [user, setUser] = useState<IUser | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { user: currentUser } = useUser();
 
-  const show = searchParams?.show;
-  const target = searchParams?.target;
+  // const show = searchParams?.show;
+  // const target = searchParams?.target;
 
   useEffect(() => {
     const fetchUser = async () => {
       const userData = await getUser(userId);
-      setUser(userData);
+      if (userData) {
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
     };
     fetchUser();
   }, [userId]);
@@ -34,29 +39,48 @@ const Profile: FC<IProps> = ({ userId, searchParams }) => {
       <div className="flex items-center">
         <div className="avatar">
           <div className="w-24 rounded-full">
-            <Image
-              src={currentUser?.photoURL ?? userPhoto}
-              width={500}
-              height={500}
-              alt="User Avatar"
-            />
+            {currentUser?.uid === userId ? (
+              <Image
+                src={currentUser?.photoURL ?? userPhoto}
+                width={500}
+                height={500}
+                alt="User Avatar"
+              />
+            ) : (
+              <Image
+                src={userPhoto}
+                width={500}
+                height={500}
+                alt="User Avatar"
+              />
+            )}
           </div>
         </div>
         <div className="ml-4 flex flex-col gap-2">
           <h2 className="text-2xl font-bold">
-            {currentUser?.displayName ?? user?.username}
+            {currentUser?.uid === userId
+              ? currentUser?.displayName
+              : user?.username}
           </h2>
-          <div className="flex flex-row gap-5">
-            <Link href={`/users/${userId}?show=true&target=profile`}>
-              <div className="btn btn-neutral">Edit Profile</div>
-            </Link>
-            <Link href={`/users/change-password`}>
-              <div className="btn btn-neutral">Change Password</div>
-            </Link>
-          </div>
+          {currentUser?.uid === userId && (
+            <div className="flex flex-row gap-5">
+              <div className="btn btn-neutral" onClick={() => setIsOpen(true)}>
+                Edit Profile
+              </div>
+
+              <Link href={`/users/change-password`}>
+                <div className="btn btn-neutral">Change Password</div>
+              </Link>
+              <Modal
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                target="profile"
+                user={user}
+              />
+            </div>
+          )}
         </div>
       </div>
-      {show && <Modal isOpen={true} target={target} user={user} />}
     </div>
   );
 };

@@ -18,7 +18,8 @@ export interface IUser {
   id: string;
   username: string;
   email: string;
-  profilePhoto?: string | StaticImport | Blob | MediaSource;
+  //  profilePhoto?: string | StaticImport | Blob | MediaSource;
+  profilePhoto?: string | StaticImport;
 }
 
 export interface IComment {
@@ -44,5 +45,10 @@ export interface IPost {
 
 export interface IFormData {
   text: string;
+  image?: FileList;
+}
+
+export interface IFormUserProfileData {
+  username: string;
   image?: FileList;
 }

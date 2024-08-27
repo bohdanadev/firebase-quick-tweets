@@ -34,19 +34,19 @@ import CommentsComponent from "./comments";
 interface IProps {
   id: string;
   post: IPost;
-  searchParams?: Record<string, string> | null | undefined;
+  // searchParams?: Record<string, string> | null | undefined;
   postPage?: boolean;
 }
 
-const Post: FC<IProps> = ({ id, post, searchParams, postPage }) => {
+const Post: FC<IProps> = ({ id, post, postPage }) => {
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(post.likes);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [comments, setComments] = useState<IComment[]>([]);
   const router = useRouter();
   const { user } = useUser();
-  const show = searchParams?.show;
-  const target = searchParams?.target;
+  // const show = searchParams?.show;
+  // const target = searchParams?.target;
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -201,12 +201,7 @@ const Post: FC<IProps> = ({ id, post, searchParams, postPage }) => {
           )}
         </div>
       </div>
-      <Modal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        target={target!}
-        post={post}
-      />
+      <Modal isOpen={isOpen} setIsOpen={setIsOpen} target="post" post={post} />
     </div>
   );
 };
