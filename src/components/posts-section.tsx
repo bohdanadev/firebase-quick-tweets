@@ -11,9 +11,15 @@ interface IProps {
   initialPosts: IPost[];
   lastVisible: string | null;
   userId?: string;
+  text?: string;
 }
 
-const PostsSection: FC<IProps> = ({ initialPosts, lastVisible, userId }) => {
+const PostsSection: FC<IProps> = ({
+  initialPosts,
+  lastVisible,
+  userId,
+  text,
+}) => {
   const [posts, setPosts] = useState<IPost[]>(initialPosts);
   const [lastDoc, setLastDoc] = useState<DocumentData>(
     lastVisible ? JSON.parse(lastVisible) : null
@@ -25,12 +31,19 @@ const PostsSection: FC<IProps> = ({ initialPosts, lastVisible, userId }) => {
     setLoading(true);
 
     const pageSize = 3;
-    const { posts: newPosts, lastVisible } = userId
-      ? await getPosts(pageSize, lastDoc, userId)
-      : await getPosts(pageSize, lastDoc);
-    setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-    setLastDoc(lastVisible);
-    if (newPosts.length < pageSize) {
+    let results;
+    if (userId) {
+      results = text
+        ? await getPosts(pageSize, lastDoc, userId, { text })
+        : await getPosts(pageSize, lastDoc, userId);
+    } else {
+      results = text
+        ? await getPosts(pageSize, lastDoc, _, { text })
+        : await getPosts(pageSize, lastDoc);
+    }
+    setPosts((prevPosts) => [...prevPosts, ...results.posts]);
+    setLastDoc(results.lastVisible);
+    if (results.posts.length < pageSize) {
       setHasMore(false);
     }
     setLoading(false);

@@ -13,7 +13,7 @@ interface IProps {
 
 const CommentsComponent: FC<IProps> = ({ post, comments, user }) => {
   return (
-    <div className="dropdown dropdown-bottom">
+    <div className="dropdown dropdown-bottom w-">
       <div
         tabIndex={0}
         role="button"

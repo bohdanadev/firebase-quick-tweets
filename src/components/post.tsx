@@ -123,7 +123,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             </span>
             {!postPage && (
               <Link href={`/posts/${id}`}>
-                <p className="text-[#d9d9d9] text-[15px] sm:text-base mt-0.5">
+                <p className="text-gray-400 text-[15px] sm:text-base mt-0.5 text-justify">
                   {post.text}
                 </p>
               </Link>
@@ -134,15 +134,19 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
           </div>
         </div>
         {postPage && (
-          <p className="text-[#d9d9d9] mt-0.5 text-xl">{post.text}</p>
+          <p className="text-gray-400 mt-0.5 text-m text-justify">
+            {post.text}
+          </p>
         )}
-        <Image
-          src={post.image}
-          alt="postImage"
-          width={100}
-          height={100}
-          className="rounded-2xl max-h-[700px] object-cover mr-2 position-relative"
-        />
+        {post.image && (
+          <Image
+            src={post.image}
+            alt="postImage"
+            width={500}
+            height={500}
+            className="rounded-2xl max-h-[700px] object-cover mr-2 position-relative"
+          />
+        )}
         <div
           className={`text-[#6e767d] flex justify-between w-10/12 ${
             postPage && "mx-auto"

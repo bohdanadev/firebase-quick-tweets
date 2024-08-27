@@ -29,6 +29,7 @@ const UserPage: FC<IProps> = async ({ params: { id } }) => {
 
       <div className="w-1/2 flex flex-col p-4 flex-grow border-l border-r border-gray-700">
         <Profile userId={id} />
+        <div className="divider divider-neutral"></div>
 
         <PostsSection
           initialPosts={initialPosts}

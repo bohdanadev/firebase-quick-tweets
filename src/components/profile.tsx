@@ -33,9 +33,59 @@ const Profile: FC<IProps> = ({ userId }) => {
     fetchUser();
   }, [userId]);
 
+  console.log(currentUser?.uid === userId);
+
+  console.log("CURRENT_USER", currentUser);
+  console.log("USER", user);
+
   const userPhoto = user?.profilePhoto ?? avatar;
   return (
-    <div className="card w-full bg-black shadow-xl p-4">
+    <div className="hero bg-base-400 min-h-700">
+      <div className="hero-content flex-col lg:flex-row-reverse">
+        {currentUser?.uid === userId ? (
+          <img
+            src={currentUser?.photoURL ?? userPhoto}
+            className="max-w-sm rounded-lg shadow-2xl"
+          />
+        ) : (
+          <img src={userPhoto} className="max-w-sm rounded-lg shadow-2xl" />
+        )}
+        <div>
+          {currentUser?.uid === userId ? (
+            <h1 className="text-3xl font-bold">
+              {currentUser?.displayName ?? user?.username}
+            </h1>
+          ) : (
+            <h1 className="text-3xl font-bold">{user?.username}</h1>
+          )}
+
+          <p className="py-6">
+            Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
+            excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
+            a id nisi.
+          </p>
+          {currentUser?.uid === userId && (
+            <div className="flex flex-row gap-5">
+              <div className="btn btn-neutral" onClick={() => setIsOpen(true)}>
+                Edit Profile
+              </div>
+
+              <Link href={`/users/change-password`}>
+                <div className="btn btn-neutral">Change Password</div>
+              </Link>
+              <Modal
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                target="profile"
+                user={user}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+
+    /*  <div className="card w-full bg-black shadow-xl p-4">
       <div className="flex items-center">
         <div className="avatar">
           <div className="w-24 rounded-full">
@@ -81,7 +131,7 @@ const Profile: FC<IProps> = ({ userId }) => {
           )}
         </div>
       </div>
-    </div>
+    </div>  */
   );
 };
 

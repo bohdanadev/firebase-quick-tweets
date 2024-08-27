@@ -88,7 +88,6 @@ export const getPosts = async (
   }
   const querySnapshot: QuerySnapshot<DocumentData> = await getDocs(q);
 
-  console.log("POSTS", querySnapshot);
   const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
   const posts = querySnapshot.docs.map((doc) => {
@@ -101,6 +100,7 @@ export const getPosts = async (
       timestamp,
     };
   });
+  console.log("POSTS", posts);
   return { posts, lastVisible };
 };
 
