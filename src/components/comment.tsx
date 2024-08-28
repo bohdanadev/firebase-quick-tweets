@@ -1,24 +1,53 @@
 "use client";
-import { IComment } from "@/types";
+import { IComment, IPost, IReplyComment } from "@/types";
 import {
   ChartBarIcon,
   ChatBubbleOvalLeftIcon,
   EllipsisHorizontalIcon,
-  HeartIcon,
-  ShareIcon,
+  PencilSquareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { FC } from "react";
+import { FC, useState } from "react";
 import avatar from "@/assets/avatar.jpg";
 import Moment from "react-moment";
+import { deleteComment, editComment } from "@/actions/post-action";
+import { useUser } from "@/lib/getUser";
+import CommentInput from "./comment-input";
+import { getReplies } from "@/lib/firebase/comment";
+import Reply from "./comment-reply";
 
 interface IProps {
-  id: string;
   comment: IComment;
+  post: IPost;
 }
 
-const Comment: FC<IProps> = ({ id, comment }) => {
+const Comment: FC<IProps> = ({ comment, post }) => {
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editedText, setEditedText] = useState<string>("");
+  const [openReply, setOpenReply] = useState<boolean>(false);
+  const [replies, setReplies] = useState<IReplyComment[]>([]);
+
+  const { user } = useUser();
+
+  const getCommentReplies = async () => {
+    const results = await getReplies(post.id, comment.id);
+    setReplies(results);
+    setOpenReply(true);
+  };
+
+  const handleEditClick = (comment: IComment) => {
+    setEditingCommentId(comment.id);
+    setEditedText(comment.comment);
+  };
+
+  const handleEditSubmit = async () => {
+    await editComment(post.id, comment.id, editedText);
+    setEditingCommentId(null);
+    setEditedText("");
+  };
+
   return (
     <div className="p-3 flex cursor-pointer border-b border-gray-700">
       <Image
@@ -39,12 +68,43 @@ const Comment: FC<IProps> = ({ id, comment }) => {
               </div>
             </Link>{" "}
             ·{" "}
-            <span className="hover:underline text-sm sm:text-[15px]">
+            <span className="hover:underline text-xs sm:text-[12px]">
               <Moment fromNow>{comment?.timestamp}</Moment>
             </span>
-            <p className="text-[#d9d9d9] mt-0.5 max-w-lg overflow-scroll text-[15px] sm:text-base">
-              {comment?.comment}
-            </p>
+            {editingCommentId === comment.id ? (
+              <>
+                <textarea
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  className="textarea textarea-bordered textarea-xs w-full max-w-xs"
+                ></textarea>
+
+                <button
+                  className="btn btn-sm btn-accent"
+                  onClick={handleEditSubmit}
+                >
+                  Send
+                </button>
+              </>
+            ) : (
+              <p className="text-black mt-0.5 max-w-lg overflow-scroll text-[15px] sm:text-base">
+                {comment?.comment}
+              </p>
+            )}
+            {openReply && (
+              <div className="border border-slate-300 w-full">
+                {replies &&
+                  replies.map((reply) => (
+                    <Reply key={reply.id} reply={reply} />
+                  ))}
+                <CommentInput
+                  post={post}
+                  commentId={comment.id}
+                  setOpenReply={setOpenReply}
+                  setReplies={setReplies}
+                />
+              </div>
+            )}
           </div>
           <div className="icon group flex-shrink-0">
             <EllipsisHorizontalIcon className="h-5 text-[#6e767d] group-hover:text-[#1d9bf0]" />
@@ -52,20 +112,28 @@ const Comment: FC<IProps> = ({ id, comment }) => {
         </div>
 
         <div className="text-[#6e767d] flex justify-between w-10/12">
-          <div className="icon group">
+          <div className="icon group" onClick={getCommentReplies}>
             <ChatBubbleOvalLeftIcon className="h-5 group-hover:text-[#1d9bf0]" />
+            {replies && replies.length > 0 && <span>{replies?.length}</span>}
           </div>
 
-          <div className="flex items-center space-x-1 group">
-            <div className="icon group-hover:bg-pink-600/10">
-              <HeartIcon className="h-5 group-hover:text-pink-600" />
-            </div>
-            <span className="group-hover:text-pink-600 text-sm"></span>
-          </div>
+          {comment.userId === user?.uid && (
+            <>
+              <div
+                className="icon group-hover:bg-pink-600/10"
+                onClick={() => handleEditClick(comment)}
+              >
+                <PencilSquareIcon className="h-5 group-hover:text-pink-600" />
+              </div>
 
-          <div className="icon group">
-            <ShareIcon className="h-5 group-hover:text-[#1d9bf0]" />
-          </div>
+              <div
+                className="icon group"
+                onClick={() => deleteComment(comment.postId, comment.id)}
+              >
+                <TrashIcon className="h-5 group-hover:text-[#1d9bf0]" />
+              </div>
+            </>
+          )}
           <div className="icon group">
             <ChartBarIcon className="h-5 group-hover:text-[#1d9bf0]" />
           </div>

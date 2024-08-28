@@ -72,9 +72,44 @@ import { initializeApp } from "firebase-admin/app";
 import { onObjectFinalized } from "firebase-functions/v2/storage";
 import { getStorage } from "firebase-admin/storage";
 import * as logger from "firebase-functions/logger";
+import * as functions from "firebase-functions";
+
 import sharp = require("sharp");
+import { firestore } from "firebase-admin";
 
 initializeApp();
+
+export const aggregateTrendingTopics = functions.pubsub
+  // .schedule('every 24 hours')
+  .schedule("every 5 minutes")
+  .onRun(async (context) => {
+    const db = firestore();
+    const postsRef = db.collection("posts");
+
+    const topLikedPostsSnapshot = await postsRef
+      .orderBy("likesCount", "desc")
+      .limit(5)
+      .get();
+
+    const topLikedPosts = topLikedPostsSnapshot.docs.map((doc) => doc.data());
+
+    const topDiscussedPostsSnapshot = await postsRef
+      .orderBy("commentsCount", "desc")
+      .limit(5)
+      .get();
+
+    const topDiscussedPosts = topDiscussedPostsSnapshot.docs.map((doc) =>
+      doc.data()
+    );
+
+    await db.collection("trending").doc("topics").set({
+      topLikedPosts,
+      topDiscussedPosts,
+      lastUpdated: firestore.FieldValue.serverTimestamp(),
+    });
+
+    functions.logger.log("Trending topics aggregated successfully");
+  });
 
 exports.generateThumbnail = onObjectFinalized({ cpu: 2 }, async (event) => {
   const fileBucket = event.data.bucket; // Storage bucket containing the file.
@@ -108,11 +143,6 @@ exports.generateThumbnail = onObjectFinalized({ cpu: 2 }, async (event) => {
     metadata: metadata,
   });
   logger.log("Original image replaced with thumbnail");
-
-  // Optionally, you can also rename the file to indicate it's a thumbnail.
-  // However, this step is usually not necessary if you intend to replace the original file.
-  // await bucket.file(thumbFilePath).delete();
-  // await bucket.file(thumbFilePath).move(filePath);
 
   return logger.log("Thumbnail uploaded!");
 });

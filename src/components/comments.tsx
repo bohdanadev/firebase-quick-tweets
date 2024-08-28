@@ -13,7 +13,7 @@ interface IProps {
 
 const CommentsComponent: FC<IProps> = ({ post, comments, user }) => {
   return (
-    <div className="dropdown dropdown-bottom w-">
+    <div className="dropdown dropdown-bottom">
       <div
         tabIndex={0}
         role="button"
@@ -28,12 +28,12 @@ const CommentsComponent: FC<IProps> = ({ post, comments, user }) => {
       </div>
       <div
         tabIndex={0}
-        className="dropdown-content menu bg-base-100 rounded-lg z-[1] w-100 p-4 shadow-lg"
+        className="dropdown-content menu bg-base-100 rounded-lg z-[1] w-96 p-4 shadow-lg"
       >
         {comments?.map((comment) => (
-          <Comment key={comment.id} comment={comment} id={comment.id} />
+          <Comment key={comment.id} comment={comment} post={post} />
         ))}
-        <CommentInput post={post} user={user} />
+        <CommentInput post={post} />
       </div>
     </div>
   );

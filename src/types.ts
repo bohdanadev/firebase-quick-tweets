@@ -22,13 +22,28 @@ export interface IUser {
   profilePhoto?: string | StaticImport;
 }
 
+export interface IReplyComment extends IComment {
+  commentId: string;
+}
+
 export interface IComment {
   id: string;
   comment: string;
+  postId: string;
   userId: string;
   username: string;
   userImg: string;
   timestamp: any;
+  // replies: {
+  //   id: string;
+  //   commentId: string;
+  //   comment: string;
+  //   userId: string;
+  //   username: string;
+  //   userImg: string;
+  //   timestamp: any;
+  // };
+  replies: IReplyComment[];
 }
 
 export interface IPost {
@@ -41,6 +56,8 @@ export interface IPost {
   timestamp: any;
   comments: IComment[];
   likes: string[];
+  likesCount: number;
+  commentsCount: number;
 }
 
 export interface IFormData {

@@ -18,6 +18,7 @@ import {
   QuerySnapshot,
   DocumentData,
   deleteField,
+  increment,
 } from "firebase/firestore";
 
 import {
@@ -193,6 +194,7 @@ export const likePost = async (postId: string, userId: string) => {
 
     return await updateDoc(postRef, {
       likes: arrayUnion(userId),
+      likesCount: increment(1),
     });
   } catch (error) {
     console.error("Error liking post: ", error);
@@ -203,5 +205,6 @@ export const unlikePost = async (postId: string, userId: string) => {
   const postRef = doc(db, "posts", postId);
   return await updateDoc(postRef, {
     likes: arrayRemove(userId),
+    likesCount: increment(-1),
   });
 };
