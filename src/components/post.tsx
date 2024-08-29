@@ -214,9 +214,9 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             </div>
           )}
         </div>
-
         {postPage && (
           <div>
+            <div className="divider divider-neutral"></div>
             {comments &&
               comments.map((comment) => (
                 <Comment

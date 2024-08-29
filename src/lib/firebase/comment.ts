@@ -16,8 +16,8 @@ import { IComment, IReplyComment } from "@/types";
 
 export const getComments = async (postId: string) => {
   const q = query(
-    collection(db, "posts", postId, "comments")
-    // orderBy("timestamp", "desc")
+    collection(db, "posts", postId, "comments"),
+    orderBy("timestamp", "desc")
   );
   return (await getDocs(q)).docs.map((doc) => {
     const id = doc.id;
@@ -29,7 +29,8 @@ export const getComments = async (postId: string) => {
 
 export const getReplies = async (postId: string, commentId: string) => {
   const q = query(
-    collection(db, "posts", postId, "comments", commentId, "replies")
+    collection(db, "posts", postId, "comments", commentId, "replies"),
+    orderBy("timestamp", "desc")
   );
   return (await getDocs(q)).docs.map((doc) => {
     const id = doc.id;

@@ -25,6 +25,10 @@ const PostsSection: FC<IProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
+  useEffect(() => {
+    setPosts(initialPosts);
+  }, [initialPosts]);
+
   const loadPosts = async () => {
     setLoading(true);
 
@@ -48,8 +52,9 @@ const PostsSection: FC<IProps> = ({
       setLoading(false);
     }
   };
+
   return (
-    <div className="mt-4 pb-72 h-full">
+    <div className="mt-4 pb-72 h-full scroll-smooth scroll-ml-0">
       {posts &&
         posts.map((post) => <Post key={post.id} id={post.id} post={post} />)}
       {loading && <DataLoading />}

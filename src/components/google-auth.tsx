@@ -2,6 +2,8 @@ import React, { useState, useEffect, FC } from "react";
 import { signInWithGoogle } from "@/lib/firebase/auth";
 import { IUser } from "@/types";
 import { User } from "firebase/auth";
+import google from "@/assets/google.jpg";
+import Image from "next/image";
 
 interface IProps {
   initialUser: IUser | User | null;
@@ -59,9 +61,10 @@ export const GoogleAuth: FC<IProps> = ({ initialUser }) => {
 
   return (
     <button
-      className="bg-teal-300 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded"
+      className="btn btn-wide flex flex-row bg-black hover:bg-black hover:font-bold text-slate-200  py-1 px-4 rounded border-2 border-neutral mt-0.5"
       onClick={handleSignIn}
     >
+      <Image src={google} alt="google logo icon" width={30} height={30} />
       {"Sign in with Google"}
     </button>
   );

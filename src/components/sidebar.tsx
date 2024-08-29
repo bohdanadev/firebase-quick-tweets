@@ -39,8 +39,6 @@ const Sidebar: FC = () => {
     }
   }, [currentUser]);
 
-  console.log("SIDEBAR", currentUser);
-
   const logout = async () => {
     await signout()
       .then(() => {

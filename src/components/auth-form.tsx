@@ -61,15 +61,14 @@ const AuthForm: FC<IProps> = ({ mode }) => {
 
   return (
     <div className="bg-black min-h-screen flex max-w-md mx-auto flex-col items-center justify-center">
-      <div className="card bg-base-100 rounded-box grid h-10 place-items-center">
-        <GoogleAuth initialUser={currentUser} />
-      </div>
-      <div className="divider divider-accent text-slate-400">OR</div>
+      <GoogleAuth initialUser={currentUser} />
+
+      <div className="divider divider-accent text-slate-400 my-2.5">OR</div>
       <form
         onSubmit={handleSubmit(
           mode === "login" ? authLoginHandler : authSignupHandler
         )}
-        className="bg-stone-100 shadow-md w-full rounded px-8 pt-6 pb-8 mb-4 flex flex-col items-center justify-between gap-5"
+        className="bg-stone-100 shadow-md w-full rounded px-8 pt-6 pb-2 mb-4 flex flex-col items-center justify-between gap-5"
       >
         <Image src={logo} alt="logo" width={30} height={30} priority />
         {mode === "signup" ? (
@@ -139,7 +138,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             </label>
             <input
               type="file"
-              className="file-input file-input-bordered file-input-sm w-full max-w-xs"
+              className="file-input file-input-bordered file-input-xs w-full max-w-xs"
               id="profilePhoto"
               {...register("profilePhoto")}
               onChange={addAvatar}
@@ -246,10 +245,10 @@ const AuthForm: FC<IProps> = ({ mode }) => {
             </>
           )}
           {mode === "signup" && (
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-gray-700 h-8 mb-3">
               <Link
                 href="/?mode=login"
-                className="btn btn-active btn-link text-md p-1 m-0"
+                className="btn btn-active btn-link text-md p-1 m-0 h-8"
               >
                 Login
               </Link>

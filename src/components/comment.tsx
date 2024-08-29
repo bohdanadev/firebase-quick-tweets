@@ -58,7 +58,7 @@ const Comment: FC<IProps> = ({ comment, post, setComments, postPage }) => {
   };
 
   return (
-    <div className="p-3 flex cursor-pointer border-b border-gray-700">
+    <div className="p-3 flex cursor-pointer border-b border-gray-700 w-full">
       <Image
         src={comment.userImg ?? avatar}
         alt=""
