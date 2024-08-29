@@ -15,7 +15,7 @@ import {
   PhotoIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { IPost, IReplyComment, IUser } from "@/types";
+import { IComment, IPost, IReplyComment, IUser } from "@/types";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 
@@ -30,6 +30,8 @@ interface IProps {
   commentId?: string;
   setOpenReply?: Dispatch<SetStateAction<boolean>>;
   setReplies?: Dispatch<SetStateAction<IReplyComment[]>>;
+  setComments?: Dispatch<SetStateAction<IComment[]>>;
+  postPage?: boolean;
 }
 
 interface ICommentFormData {
@@ -41,6 +43,8 @@ const CommentInput: FC<IProps> = ({
   commentId,
   setOpenReply,
   setReplies,
+  setComments,
+  postPage,
 }) => {
   const [userData, setUserData] = useState<IUser | null>(null);
   const { register, handleSubmit, setValue, getValues, reset } =
@@ -64,7 +68,7 @@ const CommentInput: FC<IProps> = ({
   }, [user]);
 
   const name = user?.displayName ?? userData?.username!;
-  const image = user?.photoURL ?? (userData?.profilePhoto || null);
+  const userPhoto = user?.photoURL ?? (userData?.profilePhoto || null);
 
   const addEmoji = (e: any) => {
     let sym = e.unified.split("-");
@@ -80,7 +84,16 @@ const CommentInput: FC<IProps> = ({
   };
 
   const addCommentHandler: SubmitHandler<ICommentFormData> = async (data) => {
-    await createComment(post.id, data.comment, user?.uid, name, image);
+    const newComment = await createComment(
+      post.id,
+      data.comment,
+      user?.uid,
+      name,
+      userPhoto
+    );
+    if (setComments) {
+      setComments((prevState) => [...prevState, newComment]);
+    }
     reset();
   };
 
@@ -94,7 +107,7 @@ const CommentInput: FC<IProps> = ({
         data.comment,
         user?.uid,
         name,
-        image
+        userPhoto
       );
       if (setReplies) {
         setReplies((prevState) => [...prevState, newReply]);
@@ -110,21 +123,21 @@ const CommentInput: FC<IProps> = ({
   };
 
   return (
-    <div className="border border-slate-300 w-full">
+    <div className="border-y border-slate-400 w-full p-4">
       {commentId && (
         <div className="icon" onClick={closeReplyInput}>
-          <XMarkIcon className="text-[#1d9bf0] h-[22px]" />
+          <XMarkIcon className="text-red-500 h-[22px] color-red-500" />
         </div>
       )}
-      <div className="mt-7 flex space-x-3 w-full ">
+      <div className="mt-5 pl-2 flex space-x-3 w-full ">
         <Image
           src={user?.photoURL ?? userData?.profilePhoto}
-          alt=""
-          width={11}
-          height={11}
-          className="h-11 w-11 rounded-full"
+          alt="user"
+          width={8}
+          height={8}
+          className="h-8 w-8 rounded-full"
         />
-        <h4>{user?.displayName ?? userData?.username}</h4>
+        <h4 className="mt-2 pl-2">{user?.displayName ?? userData?.username}</h4>
       </div>
       <form
         onSubmit={handleSubmit(
@@ -136,7 +149,9 @@ const CommentInput: FC<IProps> = ({
             {...register("comment", { required: true })}
             placeholder="Tweet your reply"
             rows={2}
-            className="bg-transparent outline-none text-[#d9d9d9] text-lg placeholder-gray-300 tracking-wide w-full min-h-[80px] border-b border-gray-600 focus:border-blue-500"
+            className={`bg-transparent outline-none ${
+              postPage ? "text-white" : "text-black"
+            } text-lg placeholder-gray-300 pl-2 tracking-wide w-full min-h-[80px] border-b border-gray-600 focus:border-blue-500`}
           />
         </div>
 

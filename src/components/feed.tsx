@@ -12,20 +12,20 @@ import Search from "./search";
 
 const Feed: FC = () => {
   const [initialPosts, setInitialPosts] = useState<IPost[] | null>(null);
-  const [lastDoc, setLastDoc] = useState<DocumentData | null>(null);
-  const [searchText, setSearchText] = useState<string | null>(null);
+  const [lastDocId, setLastDocId] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState<string>();
   const { user: currentUser } = useUser();
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const pageSize = 3;
+      const pageSize = 4;
       try {
         // const { posts, lastVisible } = searchText
         // ? await getPosts(pageSize, undefined, undefined, { text: searchText })
         //  : await getPosts(pageSize);
-        const { posts, lastVisible } = await getPosts(pageSize);
+        const { posts, lastVisibleId } = await getPosts(pageSize);
         setInitialPosts([...posts]);
-        setLastDoc(lastVisible);
+        setLastDocId(lastVisibleId);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
@@ -43,29 +43,33 @@ const Feed: FC = () => {
 
   console.log("FEED", initialPosts);
 
-  const serializedLastVisible = lastDoc ? JSON.stringify(lastDoc) : null;
-
   return (
     <div className="flex-grow border-l border-r border-gray-700 max-w-2xl sm:ml-[73px] xl:ml-[370px]">
-      <div className="text-[#d9d9d9] flex items-center sm:justify-between py-2 px-3 sticky top-0 z-50 bg-black border-b border-gray-700">
-        <h2 className="text-lg sm:text-xl font-bold text-teal-300">
-          Quick-Tweets
-        </h2>
-        <Search handleSearch={handleSearch} />
-        <div className="hoverAnimation w-9 h-9 flex items-center justify-center xl:px-0 ml-auto">
-          <SparklesIcon className="h-5 text-white" />
+      <div className="sticky top-0 z-50 bg-black border-b border-gray-700">
+        <div className="text-[#d9d9d9] flex items-center sm:justify-between py-2 px-3">
+          <h2 className="text-lg sm:text-xl font-bold text-teal-300">
+            Quick-Tweets
+          </h2>
+          <Search handleSearch={handleSearch} />
+          <div className="hoverAnimation w-9 h-9 flex items-center justify-center xl:px-0 ml-auto">
+            <SparklesIcon className="h-5 text-white" />
+          </div>
         </div>
+        <PostInput currentUser={currentUser} />
       </div>
-      <PostInput currentUser={currentUser} />
-      {initialPosts && (
-        <Suspense fallback={<DataLoading />}>
-          <PostsSection
-            initialPosts={initialPosts}
-            lastVisible={serializedLastVisible}
-            text={searchText}
-          />
-        </Suspense>
-      )}
+
+      <div className="overflow-y-auto h-[calc(100vh-150px)]">
+        {" "}
+        {initialPosts && (
+          <Suspense fallback={<DataLoading />}>
+            <PostsSection
+              initialPosts={initialPosts}
+              lastVisible={lastDocId}
+              text={searchText}
+            />
+          </Suspense>
+        )}
+      </div>
     </div>
   );
 };

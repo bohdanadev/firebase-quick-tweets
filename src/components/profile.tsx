@@ -43,23 +43,34 @@ const Profile: FC<IProps> = ({ userId }) => {
     <div className="hero bg-base-400 min-h-700">
       <div className="hero-content flex-col lg:flex-row-reverse">
         {currentUser?.uid === userId ? (
-          <img
+          <Image
             src={currentUser?.photoURL ?? userPhoto}
+            alt="profile photo"
+            width={300}
+            height={300}
             className="max-w-sm rounded-lg shadow-2xl"
           />
         ) : (
-          <img src={userPhoto} className="max-w-sm rounded-lg shadow-2xl" />
+          <Image
+            src={userPhoto}
+            alt="profile photo"
+            width={300}
+            height={300}
+            className="max-w-sm rounded-lg shadow-2xl"
+          />
         )}
         <div>
           {currentUser?.uid === userId ? (
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-3xl font-bold text-base-200">
               {currentUser?.displayName ?? user?.username}
             </h1>
           ) : (
-            <h1 className="text-3xl font-bold">{user?.username}</h1>
+            <h1 className="text-3xl font-bold text-base-200">
+              {user?.username}
+            </h1>
           )}
 
-          <p className="py-6">
+          <p className="py-6 text-base-200">
             Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
             excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
             a id nisi.

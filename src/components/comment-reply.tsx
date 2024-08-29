@@ -14,9 +14,9 @@ const Reply: FC<IProps> = ({ reply }) => {
       <Image
         src={reply.userImg ?? avatar}
         alt="user"
-        width={11}
-        height={11}
-        className="h-11 w-11 rounded-full mr-4"
+        width={8}
+        height={8}
+        className="h-8 w-8 rounded-full"
       />
       <div className="flex flex-col space-y-2 w-full">
         <div className="flex justify-between">

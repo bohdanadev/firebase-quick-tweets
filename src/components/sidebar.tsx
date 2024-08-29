@@ -109,7 +109,9 @@ const Sidebar: FC = () => {
           className="dropdown-content menu bg-neutral-content rounded-box z-[1] w-52 p-2 shadow"
         >
           <li>
-            <a href={`users/${currentUser?.uid}`}>Edit profile</a>
+            <Link href={`/users/${currentUser?.uid}`}>
+              <p>Edit profile</p>
+            </Link>
           </li>
           <li>
             <a>

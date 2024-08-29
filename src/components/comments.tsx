@@ -1,17 +1,23 @@
-import React, { FC } from "react";
+import React, { Dispatch, FC, SetStateAction } from "react";
 import Comment from "./comment";
 import CommentInput from "./comment-input";
-import { IPost } from "@/types";
+import { IComment, IPost } from "@/types";
 import { ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import { User } from "firebase/auth";
 
 interface IProps {
   post: IPost;
-  comments: any[];
+  comments: IComment[];
   user: User | null;
+  setComments: Dispatch<SetStateAction<IComment[]>>;
 }
 
-const CommentsComponent: FC<IProps> = ({ post, comments, user }) => {
+const CommentsComponent: FC<IProps> = ({
+  post,
+  comments,
+  user,
+  setComments,
+}) => {
   return (
     <div className="dropdown dropdown-bottom">
       <div
@@ -31,9 +37,14 @@ const CommentsComponent: FC<IProps> = ({ post, comments, user }) => {
         className="dropdown-content menu bg-base-100 rounded-lg z-[1] w-96 p-4 shadow-lg"
       >
         {comments?.map((comment) => (
-          <Comment key={comment.id} comment={comment} post={post} />
+          <Comment
+            key={comment.id}
+            comment={comment}
+            post={post}
+            setComments={setComments}
+          />
         ))}
-        <CommentInput post={post} />
+        <CommentInput post={post} setComments={setComments} />
       </div>
     </div>
   );

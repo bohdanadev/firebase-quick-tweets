@@ -48,17 +48,22 @@ function applyQueryFilters(q, { text, username }: FiltersType) {
 
 export const getPosts = async (
   pageSize: number,
-  lastDoc?: DocumentData,
+  lastDoc?: string,
   userId?: string,
   filters?: { text?: string; username?: string }
 ) => {
   let q;
+  let lastDocSnap;
+  if (lastDoc) {
+    const docRef = doc(db, "posts", lastDoc);
+    lastDocSnap = await getDoc(docRef);
+  }
   if (lastDoc) {
     q = query(
       collection(db, "posts"),
       orderBy("timestamp", "desc"),
       limit(pageSize),
-      startAfter(lastDoc)
+      startAfter(lastDocSnap)
     );
   } else {
     q = query(
@@ -75,7 +80,7 @@ export const getPosts = async (
           where("userId", "==", userId),
           orderBy("timestamp", "desc"),
           limit(pageSize),
-          startAfter(lastDoc)
+          startAfter(lastDocSnap)
         )
       : query(
           collection(db, "posts"),
@@ -91,6 +96,8 @@ export const getPosts = async (
 
   const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
+  const lastVisibleId = lastVisible?.id;
+
   const posts = querySnapshot.docs.map((doc) => {
     const id = doc.id;
     const data = doc.data() as Omit<IPost, "id">;
@@ -102,7 +109,7 @@ export const getPosts = async (
     };
   });
   console.log("POSTS", posts);
-  return { posts, lastVisible };
+  return { posts, lastVisibleId };
 };
 
 export const addPost = async (

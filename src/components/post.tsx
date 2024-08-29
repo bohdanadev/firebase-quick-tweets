@@ -30,6 +30,8 @@ import avatar from "@/assets/avatar.jpg";
 import { useUser } from "@/lib/getUser";
 import { getComments } from "@/lib/firebase/comment";
 import CommentsComponent from "./comments";
+import Comment from "./comment";
+import CommentInput from "./comment-input";
 
 interface IProps {
   id: string;
@@ -101,7 +103,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
                 alt="Profile Pic"
                 width={11}
                 height={11}
-                className="h-11 w-11 rounded-full mr-4"
+                className="h-11 w-11 rounded-full mr-4 max-h-[500px]"
               />
             </Link>
           )}
@@ -139,21 +141,29 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
           </p>
         )}
         {post.image && (
-          <Image
-            src={post.image}
-            alt="postImage"
-            width={500}
-            height={500}
-            className="rounded-2xl max-h-[700px] object-cover mr-2 position-relative"
-          />
+          <Link href={`/posts/${id}`}>
+            <Image
+              src={post.image}
+              alt="postImage"
+              width={500}
+              height={500}
+              className="rounded-2xl max-h-[500px] object-cover mr-2 position-relative"
+            />
+          </Link>
         )}
+
         <div
           className={`text-[#6e767d] flex justify-between w-10/12 ${
             postPage && "mx-auto"
           }`}
         >
           {!postPage && (
-            <CommentsComponent post={post} comments={comments} user={user} />
+            <CommentsComponent
+              post={post}
+              comments={comments}
+              user={user}
+              setComments={setComments}
+            />
           )}
 
           {user?.uid === post.userId ? (
@@ -204,6 +214,26 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             </div>
           )}
         </div>
+
+        {postPage && (
+          <div>
+            {comments &&
+              comments.map((comment) => (
+                <Comment
+                  key={comment.id}
+                  comment={comment}
+                  post={post}
+                  setComments={setComments}
+                  postPage={true}
+                />
+              ))}
+            <CommentInput
+              post={post}
+              setComments={setComments}
+              postPage={true}
+            />
+          </div>
+        )}
       </div>
       <Modal isOpen={isOpen} setIsOpen={setIsOpen} target="post" post={post} />
     </div>

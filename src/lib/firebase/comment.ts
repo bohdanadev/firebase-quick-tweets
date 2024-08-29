@@ -9,14 +9,15 @@ import {
   doc,
   increment,
   deleteDoc,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { IComment, IReplyComment } from "@/types";
 
 export const getComments = async (postId: string) => {
   const q = query(
-    collection(db, "posts", postId, "comments"),
-    orderBy("timestamp", "desc")
+    collection(db, "posts", postId, "comments")
+    // orderBy("timestamp", "desc")
   );
   return (await getDocs(q)).docs.map((doc) => {
     const id = doc.id;
@@ -45,7 +46,7 @@ export const addComment = async (
   username: string,
   userImg: any
 ) => {
-  await addDoc(collection(db, "posts", postId, "comments"), {
+  const docRef = await addDoc(collection(db, "posts", postId, "comments"), {
     comment,
     postId,
     userId,
@@ -56,6 +57,7 @@ export const addComment = async (
   await updateDoc(doc(db, "posts", postId), {
     commentsCount: increment(1),
   });
+  return (await getDoc(docRef)).data();
 };
 
 export const addReplyToComment = async (
@@ -66,7 +68,7 @@ export const addReplyToComment = async (
   username: string,
   userImg: any
 ) => {
-  await addDoc(
+  const docRef = await addDoc(
     collection(db, "posts", postId, "comments", commentId, "replies"),
     {
       commentId,
@@ -80,6 +82,7 @@ export const addReplyToComment = async (
   await updateDoc(doc(db, "posts", postId), {
     commentsCount: increment(1),
   });
+  return (await getDoc(docRef)).data();
 };
 
 export const deleteCommentWithReplies = async (

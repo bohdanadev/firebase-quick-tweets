@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import {
   addPost,
   deletePostWithComments,
-  getPost,
   likePost,
   unlikePost,
   updatePost,
@@ -27,11 +26,10 @@ export async function createPost(
 ) {
   try {
     await addPost(userId, username, profilePhoto, input, selectedFile);
+    revalidatePath("/posts", "page");
   } catch (error) {
     throw new Error("Create post failed");
   }
-
-  revalidatePath("/posts", "page");
 }
 
 export async function createComment(
@@ -42,9 +40,16 @@ export async function createComment(
   userImg: any
 ) {
   try {
-    await addComment(postId, comment, userId, username, userImg);
-    revalidatePath("/posts", "page");
-    revalidatePath(`/posts/${postId}`, "page");
+    const newComment = await addComment(
+      postId,
+      comment,
+      userId,
+      username,
+      userImg
+    );
+    // revalidatePath("/posts", "page");
+    // revalidatePath(`/posts/${postId}`, "page");
+    return newComment;
   } catch (error) {
     throw new Error("Failed create comment");
   }
@@ -59,7 +64,7 @@ export async function createReplyComment(
   userImg: any
 ) {
   try {
-    await addReplyToComment(
+    const newReply = await addReplyToComment(
       postId,
       commentId,
       comment,
@@ -67,10 +72,11 @@ export async function createReplyComment(
       username,
       userImg
     );
-    revalidatePath("/posts", "page");
-    revalidatePath(`/posts/${postId}`, "page");
+    return newReply;
+    ///  revalidatePath("/posts", "page");
+    ///  revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {
-    throw new Error("Failed create comment");
+    throw new Error("Failed create comment reply");
   }
 }
 
@@ -107,19 +113,19 @@ export async function editComment(
 export async function deletePost(postId: string) {
   try {
     await deletePostWithComments(postId);
+    revalidatePath("/posts", "page");
+    revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {}
-  revalidatePath("/posts", "page");
-  revalidatePath(`/posts/${postId}`, "page");
 }
 
 export async function deleteComment(postId: string, commentId: string) {
   try {
     await deleteCommentWithReplies(postId, commentId);
+    revalidatePath("/posts", "page");
+    revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {
     throw new Error("Failed delete comment");
   }
-  revalidatePath("/posts", "page");
-  revalidatePath(`/posts/${postId}`, "page");
 }
 
 export async function likePostAction(postId: string, userId: string) {

@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { FC, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import avatar from "@/assets/avatar.jpg";
 import Moment from "react-moment";
 import { deleteComment, editComment } from "@/actions/post-action";
@@ -21,21 +21,24 @@ import Reply from "./comment-reply";
 interface IProps {
   comment: IComment;
   post: IPost;
+  setComments: Dispatch<SetStateAction<IComment[]>>;
+  postPage?: boolean;
 }
 
-const Comment: FC<IProps> = ({ comment, post }) => {
+const Comment: FC<IProps> = ({ comment, post, setComments, postPage }) => {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editedText, setEditedText] = useState<string>("");
   const [openReply, setOpenReply] = useState<boolean>(false);
   const [replies, setReplies] = useState<IReplyComment[]>([]);
 
   const { user } = useUser();
-
-  const getCommentReplies = async () => {
-    const results = await getReplies(post.id, comment.id);
-    setReplies(results);
-    setOpenReply(true);
-  };
+  useEffect(() => {
+    const getCommentReplies = async () => {
+      const results = await getReplies(post.id, comment.id);
+      setReplies(results);
+    };
+    getCommentReplies();
+  }, [post.id, comment.id]);
 
   const handleEditClick = (comment: IComment) => {
     setEditingCommentId(comment.id);
@@ -47,22 +50,28 @@ const Comment: FC<IProps> = ({ comment, post }) => {
     setEditingCommentId(null);
     setEditedText("");
   };
+  const handleDeleteSubmit = async () => {
+    await deleteComment(comment.postId, comment.id);
+    setComments((prevState) =>
+      prevState.filter((item) => item.id !== comment.id)
+    );
+  };
 
   return (
     <div className="p-3 flex cursor-pointer border-b border-gray-700">
       <Image
         src={comment.userImg ?? avatar}
         alt=""
-        width={11}
-        height={11}
-        className="h-11 w-11 rounded-full mr-4"
+        width={8}
+        height={8}
+        className="h-8 w-8 rounded-full mr-4"
       />
       <div className="flex flex-col space-y-2 w-full">
         <div className="flex justify-between">
           <div className="text-[#6e767d]">
             <Link href={`/users/${comment.userId}`}>
               <div className="inline-block group">
-                <h4 className="font-bold text-[#d9d9d9] text-[15px] sm:text-base inline-block group-hover:underline">
+                <h4 className="font-bold text-[#d9d9d9] text-[15px] sm:text-base inline-block group-hover:underline mt-1">
                   {comment?.username}
                 </h4>
               </div>
@@ -87,7 +96,11 @@ const Comment: FC<IProps> = ({ comment, post }) => {
                 </button>
               </>
             ) : (
-              <p className="text-black mt-0.5 max-w-lg overflow-scroll text-[15px] sm:text-base">
+              <p
+                className={`${
+                  postPage ? "text-neutral-200" : "text-black"
+                } mt-0.5 max-w-lg overflow-scroll text-[15px] sm:text-base`}
+              >
                 {comment?.comment}
               </p>
             )}
@@ -95,7 +108,7 @@ const Comment: FC<IProps> = ({ comment, post }) => {
               <div className="border border-slate-300 w-full">
                 {replies &&
                   replies.map((reply) => (
-                    <Reply key={reply.id} reply={reply} />
+                    <Reply key={reply?.id} reply={reply} />
                   ))}
                 <CommentInput
                   post={post}
@@ -112,7 +125,7 @@ const Comment: FC<IProps> = ({ comment, post }) => {
         </div>
 
         <div className="text-[#6e767d] flex justify-between w-10/12">
-          <div className="icon group" onClick={getCommentReplies}>
+          <div className="icon group" onClick={() => setOpenReply(true)}>
             <ChatBubbleOvalLeftIcon className="h-5 group-hover:text-[#1d9bf0]" />
             {replies && replies.length > 0 && <span>{replies?.length}</span>}
           </div>
@@ -126,10 +139,7 @@ const Comment: FC<IProps> = ({ comment, post }) => {
                 <PencilSquareIcon className="h-5 group-hover:text-pink-600" />
               </div>
 
-              <div
-                className="icon group"
-                onClick={() => deleteComment(comment.postId, comment.id)}
-              >
+              <div className="icon group" onClick={handleDeleteSubmit}>
                 <TrashIcon className="h-5 group-hover:text-[#1d9bf0]" />
               </div>
             </>

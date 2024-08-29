@@ -13,16 +13,14 @@ interface IProps {
 
 const UserPage: FC<IProps> = async ({ params: { id } }) => {
   const pageSize = 3;
-  const { posts: initialPosts, lastVisible } = await getPosts(pageSize, {
-    userId: id,
-  });
-
-  const serializedLastVisible = lastVisible
-    ? JSON.stringify(lastVisible)
-    : null;
+  const { posts: initialPosts, lastVisibleId } = await getPosts(
+    pageSize,
+    undefined,
+    id
+  );
 
   return (
-    <div className="bg-black min-h-screen flex max-w-[1500px] mx-auto">
+    <div className="bg-black min-h-screen flex max-w-[1500px] mx-auto h-full">
       <div className="w-1/4">
         <Sidebar />
       </div>
@@ -34,7 +32,7 @@ const UserPage: FC<IProps> = async ({ params: { id } }) => {
         <PostsSection
           initialPosts={initialPosts}
           userId={id}
-          lastVisible={serializedLastVisible}
+          lastVisible={lastVisibleId}
         />
       </div>
       <div className="w-1/4 ml-4">
