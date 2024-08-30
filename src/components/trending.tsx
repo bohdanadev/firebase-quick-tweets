@@ -11,9 +11,11 @@ interface IProps {
 const Trending: FC<IProps> = ({ post }) => {
   return (
     <div className="hover:bg-white hover:bg-opacity-[0.03] px-4 py-2 cursor-pointer transition duration-200 ease-out flex items-center justify-between">
-      <Link href={`/posts/${post.id}`}>
+      <Link href={`/posts/${post.id}`} className="flex flex-col items-center">
         <div className="space-y-0.5">
-          <p className="text-[#6e767d] text-xs font-medium">{post.text}</p>
+          <p className="text-[#6e767d] text-xs font-medium text-justify">
+            {post.text}
+          </p>
         </div>
 
         {post.image ? (

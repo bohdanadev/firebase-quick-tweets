@@ -80,6 +80,7 @@ const Feed: FC = () => {
               initialPosts={initialPosts}
               lastVisible={lastDocId}
               text={searchText}
+              showMy={showMyPosts}
             />
           </Suspense>
         )}

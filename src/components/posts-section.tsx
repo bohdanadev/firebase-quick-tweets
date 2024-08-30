@@ -6,12 +6,14 @@ import { getPosts } from "@/lib/firebase/post";
 import { IPost } from "@/types";
 import { DocumentData } from "firebase/firestore";
 import DataLoading from "@/app/loading";
+import { useUser } from "@/lib/getUser";
 
 interface IProps {
   initialPosts: IPost[];
   lastVisible: string;
   userId?: string;
   text?: string;
+  showMyPosts?: boolean;
 }
 
 const PostsSection: FC<IProps> = ({
@@ -19,11 +21,14 @@ const PostsSection: FC<IProps> = ({
   lastVisible,
   userId,
   text,
+  showMyPosts,
 }) => {
   const [posts, setPosts] = useState<IPost[]>(initialPosts);
   const [lastDoc, setLastDoc] = useState<string>(lastVisible);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
+
+  const { user } = useUser();
 
   useEffect(() => {
     setPosts(initialPosts);
@@ -32,12 +37,13 @@ const PostsSection: FC<IProps> = ({
   const loadPosts = async () => {
     setLoading(true);
 
-    const pageSize = 3;
+    const pageSize = 4;
     if (lastDoc) {
       let results;
-      if (userId) {
+      if (userId || showMyPosts) {
+        const userIdForFetch = showMyPosts ? user?.uid : userId;
         results = text
-          ? await getPosts(pageSize, lastDoc, userId, { text })
+          ? await getPosts(pageSize, lastDoc, userIdForFetch, { text })
           : await getPosts(pageSize, lastDoc, userId);
       } else {
         results = text

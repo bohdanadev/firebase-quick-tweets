@@ -37,7 +37,7 @@ const Modal: FC<IProps> = ({ isOpen, setIsOpen, target, post, user }) => {
               <UserEditForm
                 userId={user.id}
                 currentUsername={user.username}
-                currentProfilePhoto={user.profilePhoto}
+                currentProfilePhoto={user?.profilePhoto}
                 closeModal={handleCloseModal}
               />
             )}

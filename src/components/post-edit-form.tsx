@@ -13,6 +13,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import { IFormData } from "@/types";
+import { editPost } from "@/actions/post-action";
+import Image from "next/image";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface IPostEditFormProps {
   postId: string;
@@ -34,28 +37,29 @@ const PostEditForm: FC<IPostEditFormProps> = ({
   const onSubmit: SubmitHandler<IFormData> = async (data) => {
     setLoading(true);
     try {
-      const postRef = doc(db, "posts", postId);
-      let updatedFields: { text?: string; imageUrl?: string | null } = {};
+      await editPost(postId, data, currentText, currentImageUrl);
+      //    const postRef = doc(db, "posts", postId);
+      //    let updatedFields: { text?: string; imageUrl?: string | null } = {};
 
-      if (data.text) {
-        updatedFields.text = data.text;
-      }
+      //    if (data.text) {
+      //      updatedFields.text = data.text;
+      //    }
 
-      if (data.image && data.image.length > 0) {
-        const imageFile = data.image[0];
-        const imageRef = ref(storage, `posts/${postId}/${imageFile.name}`);
-        await uploadBytes(imageRef, imageFile);
-        const imageUrl = await getDownloadURL(imageRef);
-        updatedFields.imageUrl = imageUrl;
-      }
+      //    if (data.image && data.image.length > 0) {
+      //      const imageFile = data.image[0];
+      //      const imageRef = ref(storage, `posts/${postId}/${imageFile.name}`);
+      //      await uploadBytes(imageRef, imageFile);
+      //      const imageUrl = await getDownloadURL(imageRef);
+      //      updatedFields.imageUrl = imageUrl;
+      //    }
 
-      if (currentImageUrl && !data.image) {
-        const imageRef = ref(storage, currentImageUrl);
-        await deleteObject(imageRef);
-        updatedFields.imageUrl = deleteField();
-      }
+      //    if (currentImageUrl && !data.image) {
+      //      const imageRef = ref(storage, currentImageUrl);
+      //      await deleteObject(imageRef);
+      //      updatedFields.imageUrl = deleteField();
+      //    }
 
-      await updateDoc(postRef, updatedFields);
+      //    await updateDoc(postRef, updatedFields);
       closeModal();
     } catch (error) {
       console.error("Error updating post:", error);
@@ -114,9 +118,11 @@ const PostEditForm: FC<IPostEditFormProps> = ({
       <div className="form-control">
         {currentImageUrl && (
           <div className="relative">
-            <img
+            <Image
               src={currentImageUrl}
               alt="Current Image"
+              width={300}
+              height={256}
               className="w-full h-64 object-cover"
             />
             <button
@@ -124,7 +130,7 @@ const PostEditForm: FC<IPostEditFormProps> = ({
               className="btn btn-sm absolute top-2 right-2"
               onClick={() => setValue("image", undefined)}
             >
-              Delete Image
+              <XMarkIcon className="text-red-500 h-[22px] color-red-500" />
             </button>
           </div>
         )}

@@ -69,3 +69,8 @@ export interface IFormUserProfileData {
   username: string;
   image?: FileList;
 }
+
+export interface ITrendings {
+  topDiscussedPosts: IPost[];
+  topLikedPosts: IPost[];
+}

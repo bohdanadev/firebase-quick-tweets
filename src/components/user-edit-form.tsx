@@ -11,6 +11,7 @@ import {
 import { db, storage } from "@/lib/firebase/firebase";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { IFormData, IFormUserProfileData } from "@/types";
+import { editProfile } from "@/actions/user-actions";
 
 interface IProps {
   userId: string;
@@ -32,32 +33,33 @@ const UserEditForm: FC<IProps> = ({
   const onSubmit: SubmitHandler<IFormUserProfileData> = async (data) => {
     setLoading(true);
     try {
-      const userRef = doc(db, "users", userId);
-      let updatedFields: { username?: string; profilePhoto?: string | null } =
-        {};
+      await editProfile(userId, data, currentProfilePhoto);
+      // const userRef = doc(db, "users", userId);
+      // let updatedFields: { username?: string; profilePhoto?: string | null } =
+      //   {};
 
-      if (data.username) {
-        updatedFields.username = data.username;
-      }
+      // if (data.username) {
+      //   updatedFields.username = data.username;
+      // }
 
-      if (data.image && data.image.length > 0) {
-        const imageFile = data.image[0];
-        const imageRef = ref(
-          storage,
-          `profilePhotos/${userId}/${imageFile.name}`
-        );
-        await uploadBytes(imageRef, imageFile);
-        const imageUrl = await getDownloadURL(imageRef);
-        updatedFields.profilePhoto = imageUrl;
-      }
+      // if (data.image && data.image.length > 0) {
+      //   const imageFile = data.image[0];
+      //   const imageRef = ref(
+      //     storage,
+      //     `profilePhotos/${userId}/${imageFile.name}`
+      //   );
+      //   await uploadBytes(imageRef, imageFile);
+      //   const imageUrl = await getDownloadURL(imageRef);
+      //   updatedFields.profilePhoto = imageUrl;
+      // }
 
-      if (currentProfilePhoto && !data.image) {
-        const imageRef = ref(storage, currentProfilePhoto);
-        await deleteObject(imageRef);
-        updatedFields.profilePhoto = deleteField();
-      }
+      // if (currentProfilePhoto && !data.image) {
+      //   const imageRef = ref(storage, currentProfilePhoto);
+      //   await deleteObject(imageRef);
+      //   updatedFields.profilePhoto = deleteField();
+      // }
 
-      await updateDoc(userRef, updatedFields);
+      // await updateDoc(userRef, updatedFields);
       closeModal();
     } catch (error) {
       console.error("Error updating post:", error);

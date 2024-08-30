@@ -2,14 +2,11 @@
 import React, { FC, useEffect, useState } from "react";
 import {
   ArrowsRightLeftIcon,
-  ChartBarIcon,
-  ChatBubbleOvalLeftEllipsisIcon,
   EllipsisHorizontalIcon,
   HeartIcon,
   PencilSquareIcon,
   ShareIcon,
   TrashIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Moment from "react-moment";
 import {
@@ -36,7 +33,6 @@ import CommentInput from "./comment-input";
 interface IProps {
   id: string;
   post: IPost;
-  // searchParams?: Record<string, string> | null | undefined;
   postPage?: boolean;
 }
 
@@ -47,8 +43,6 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
   const [comments, setComments] = useState<IComment[]>([]);
   const router = useRouter();
   const { user } = useUser();
-  // const show = searchParams?.show;
-  // const target = searchParams?.target;
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -84,7 +78,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
   return (
     <div className="p-3 flex cursor-pointer border-b border-gray-700">
       {!postPage && (
-        <Link href={`/users/${post.userId}`}>
+        <Link href={`/users/${post.userId}`} className="flex justify-center">
           <Image
             src={post.userImg ?? avatar}
             alt="userAvatar"
@@ -141,7 +135,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
           </p>
         )}
         {post.image && (
-          <Link href={`/posts/${id}`}>
+          <Link href={`/posts/${id}`} className="flex justify-center">
             <Image
               src={post.image}
               alt="postImage"
