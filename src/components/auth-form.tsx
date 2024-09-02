@@ -61,7 +61,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
 
   return (
     <div className="bg-black min-h-screen flex max-w-md mx-auto flex-col items-center justify-center">
-      <GoogleAuth initialUser={currentUser} />
+      <GoogleAuth />
 
       <div className="divider divider-accent text-slate-400 my-2.5">OR</div>
       <form

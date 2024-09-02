@@ -11,62 +11,61 @@ import { firestore } from "firebase-admin";
 
 initializeApp();
 
-export const aggregateTrendingTopics = onSchedule("*/5 * * * *", async () => {
-  try {
-    const db = firestore();
-    const postsRef = db.collection("posts");
+export const aggregateTrendingTopics = onSchedule(
+  "every day 00:00",
+  async () => {
+    try {
+      const db = firestore();
+      const postsRef = db.collection("posts");
 
-    const topLikedPostsSnapshot = await postsRef
-      .orderBy("likesCount", "desc")
-      .limit(3)
-      .get();
+      const topLikedPostsSnapshot = await postsRef
+        .orderBy("likesCount", "desc")
+        .limit(3)
+        .get();
 
-    const topLikedPosts = topLikedPostsSnapshot.docs.map((doc) => doc.data());
+      const topLikedPosts = topLikedPostsSnapshot.docs.map((doc) => doc.data());
 
-    const topDiscussedPostsSnapshot = await postsRef
-      .orderBy("commentsCount", "desc")
-      .limit(3)
-      .get();
+      const topDiscussedPostsSnapshot = await postsRef
+        .orderBy("commentsCount", "desc")
+        .limit(3)
+        .get();
 
-    const topDiscussedPosts = topDiscussedPostsSnapshot.docs.map((doc) =>
-      doc.data()
-    );
+      const topDiscussedPosts = topDiscussedPostsSnapshot.docs.map((doc) =>
+        doc.data()
+      );
 
-    await db.collection("trending").doc("topics").set({
-      topLikedPosts,
-      topDiscussedPosts,
-      lastUpdated: firestore.FieldValue.serverTimestamp(),
-    });
+      await db.collection("trending").doc("topics").set({
+        topLikedPosts,
+        topDiscussedPosts,
+        lastUpdated: firestore.FieldValue.serverTimestamp(),
+      });
 
-    functions.logger.log("Trending topics aggregated successfully");
-  } catch (error) {
-    functions.logger.error("Error aggregating trending topics:", error);
+      functions.logger.log("Trending topics aggregated successfully");
+    } catch (error) {
+      functions.logger.error("Error aggregating trending topics:", error);
+    }
   }
-});
+);
 
 exports.generateThumbnail = onObjectFinalized({ cpu: 2 }, async (event) => {
-  const fileBucket = event.data.bucket; // Storage bucket containing the file.
-  const filePath = event.data.name; // File path in the bucket.
-  const contentType = event.data.contentType; // File content type.
+  const fileBucket = event.data.bucket;
+  const filePath = event.data.name;
+  const contentType = event.data.contentType;
 
-  // Exit if this is triggered on a file that is not an image.
   if (!contentType?.startsWith("image/")) {
     return logger.log("This is not an image.");
   }
 
-  // Exit if the image is already a thumbnail.
   const fileName = path.basename(filePath);
   if (fileName.startsWith("thumb_")) {
     return logger.log("Already a Thumbnail.");
   }
 
-  // Download file into memory from the bucket.
   const bucket = getStorage().bucket(fileBucket);
   const downloadResponse = await bucket.file(filePath).download();
   const imageBuffer = downloadResponse[0];
   logger.log("Image downloaded!");
 
-  // Generate a thumbnail using sharp.
   const thumbnailBuffer = await sharp(imageBuffer)
     .resize({
       width: 300,
@@ -76,11 +75,9 @@ exports.generateThumbnail = onObjectFinalized({ cpu: 2 }, async (event) => {
     .toBuffer();
   logger.log("Thumbnail created");
 
-  // Prefix 'thumb_' to file name.
   const thumbFileName = `thumb_${fileName}`;
   const thumbFilePath = path.join(path.dirname(filePath), thumbFileName);
 
-  // Upload the thumbnail.
   const metadata = { contentType: contentType };
   await bucket.file(thumbFilePath).save(thumbnailBuffer, {
     metadata: metadata,

@@ -4,7 +4,6 @@ import { FC, useEffect, useState } from "react";
 import Post from "@/components/post";
 import { getPosts } from "@/lib/firebase/post";
 import { IPost } from "@/types";
-import { DocumentData } from "firebase/firestore";
 import DataLoading from "@/app/loading";
 import { useUser } from "@/lib/getUser";
 
@@ -41,10 +40,10 @@ const PostsSection: FC<IProps> = ({
     if (lastDoc) {
       let results;
       if (userId || showMyPosts) {
-        const userIdForFetch = showMyPosts ? user?.uid : userId;
+        const userIdForFetch = showMyPosts ? user?.id : userId;
         results = text
           ? await getPosts(pageSize, lastDoc, userIdForFetch, { text })
-          : await getPosts(pageSize, lastDoc, userId);
+          : await getPosts(pageSize, lastDoc, userIdForFetch);
       } else {
         results = text
           ? await getPosts(pageSize, lastDoc, undefined, { text })
@@ -55,8 +54,8 @@ const PostsSection: FC<IProps> = ({
       if (results.posts.length < pageSize) {
         setHasMore(false);
       }
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
@@ -64,15 +63,14 @@ const PostsSection: FC<IProps> = ({
       {posts &&
         posts.map((post) => <Post key={post.id} id={post.id} post={post} />)}
       {loading && <DataLoading />}
-      {!loading && hasMore && (
+      {!loading && posts.length > 0 && hasMore ? (
         <button
           className="btn btn-active btn-neutral w-full mx-auto bg-black mt-4 border-none"
           onClick={loadPosts}
         >
           Load more
         </button>
-      )}
-      {!hasMore && (
+      ) : (
         <p className="text-center mt-4 text-lg text-gray-200">No more posts</p>
       )}
     </div>

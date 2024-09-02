@@ -14,13 +14,11 @@ import {
   deleteCommentWithReplies,
   updateComment,
 } from "@/lib/firebase/comment";
-import { IFormData } from "@/types";
 
 export async function createPost(
   userId: string,
   username: string,
   profilePhoto: string,
-
   input: string,
   selectedFile: string | ArrayBuffer | null
 ) {
@@ -47,8 +45,6 @@ export async function createComment(
       username,
       userImg
     );
-    // revalidatePath("/posts", "page");
-    // revalidatePath(`/posts/${postId}`, "page");
     return newComment;
   } catch (error) {
     throw new Error("Failed create comment");
@@ -73,8 +69,6 @@ export async function createReplyComment(
       userImg
     );
     return newReply;
-    ///  revalidatePath("/posts", "page");
-    ///  revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {
     throw new Error("Failed create comment reply");
   }
@@ -82,12 +76,10 @@ export async function createReplyComment(
 
 export async function editPost(
   postId: string,
-  data: IFormData,
-  currentText: string,
-  currentImageUrl: string
+  updatedFields: { text?: string; image?: string | null }
 ) {
   try {
-    await updatePost(postId, data, currentText, currentImageUrl);
+    await updatePost(postId, updatedFields);
 
     revalidatePath(`/posts/${postId}`, "page");
     revalidatePath("/posts", "page");
@@ -115,7 +107,9 @@ export async function deletePost(postId: string) {
     await deletePostWithComments(postId);
     revalidatePath("/posts", "page");
     revalidatePath(`/posts/${postId}`, "page");
-  } catch (error) {}
+  } catch (error) {
+    throw new Error("Failed delete post", error);
+  }
 }
 
 export async function deleteComment(postId: string, commentId: string) {

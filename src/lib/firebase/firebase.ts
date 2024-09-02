@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { connectStorageEmulator, getStorage } from "firebase/storage";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
@@ -16,8 +16,5 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-
-// Point to the Storage emulator running on localhost.
-//connectStorageEmulator(storage, "127.0.0.1", 9199);
 
 export { app, db, auth, storage, firebaseConfig };

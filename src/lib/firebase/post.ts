@@ -1,4 +1,4 @@
-import { IFormData, IPost } from "@/types";
+import { IPost } from "@/types";
 import {
   collection,
   query,
@@ -19,14 +19,12 @@ import {
   DocumentData,
   deleteField,
   increment,
-  FieldValue,
 } from "firebase/firestore";
 
 import {
   deleteObject,
   getDownloadURL,
   ref,
-  uploadBytes,
   uploadString,
 } from "@firebase/storage";
 import { db, storage } from "./firebase";
@@ -134,7 +132,8 @@ export const addPost = async (
   if (selectedFile) {
     await uploadString(imageRef, selectedFile, "data_url").then(async () => {
       const downloadURL = await getDownloadURL(
-        ref(storage, `posts/${docRef.id}/thumb_image`)
+        imageRef
+        //  ref(storage, `posts/${docRef.id}/thumb_image`)
       );
       await updateDoc(doc(db, "posts", docRef.id), {
         image: downloadURL,
@@ -160,37 +159,14 @@ export const getPost = async (postId: string) => {
 
 export const updatePost = async (
   postId: string,
-  data: IFormData,
-  currentText?: string,
-  currentImageUrl?: string
+  updatedFields: { text?: string; image?: string | null }
 ) => {
   const postRef = doc(db, "posts", postId);
-  let updatedFields: { text?: string; imageUrl?: string | null | FieldValue } =
-    {};
-
-  if (data.text) {
-    updatedFields.text = data.text;
+  if (!updatedFields.image) {
+    return await updateDoc(postRef, { image: deleteField(), ...updatedFields });
+  } else {
+    return await updateDoc(postRef, updatedFields);
   }
-
-  if (data.image && data.image.length > 0) {
-    const imageFile = data.image[0];
-    // const imageRef = ref(storage, `posts/${postId}/${imageFile.name}`);
-    const imageRef = ref(storage, `posts/${postId}/image`);
-    await uploadBytes(imageRef, imageFile);
-    const imageUrl = await getDownloadURL(
-      //  ref(storage, `posts/${postId}/thumb_${imageFile.name}`)
-      ref(storage, `posts/${postId}/thumb_image`)
-    );
-    updatedFields.imageUrl = imageUrl;
-  }
-
-  if (currentImageUrl && data.image) {
-    const imageRef = ref(storage, currentImageUrl);
-    await deleteObject(imageRef);
-    //  updatedFields.imageUrl = deleteField();
-  }
-
-  return await updateDoc(postRef, updatedFields);
 };
 
 const deleteCommentReplies = async (postId: string, commentId: string) => {
@@ -198,25 +174,29 @@ const deleteCommentReplies = async (postId: string, commentId: string) => {
     collection(db, "posts", postId, "comments", commentId, "replies")
   );
   const replyQuerySnapshot = await getDocs(qR);
-  replyQuerySnapshot.forEach(async (reply) => {
-    await deleteDoc(
-      doc(db, "posts", postId, "comments", commentId, "replies", reply.id)
-    );
-  });
+  if (!replyQuerySnapshot.empty) {
+    replyQuerySnapshot.forEach(async (reply) => {
+      await deleteDoc(
+        doc(db, "posts", postId, "comments", commentId, "replies", reply.id)
+      );
+    });
+  }
 };
 
 export const deletePostWithComments = async (postId: string) => {
   const q = query(collection(db, "posts", postId, "comments"));
   const querySnapshot = await getDocs(q);
-  querySnapshot.forEach(async (comment) => {
-    await deleteCommentReplies(postId, comment.id);
-    await deleteDoc(doc(db, "posts", postId, "comments", comment.id));
-  });
+  if (!querySnapshot.empty) {
+    querySnapshot.forEach(async (comment) => {
+      await deleteCommentReplies(postId, comment.id);
+      await deleteDoc(doc(db, "posts", postId, "comments", comment.id));
+    });
+  }
   await deleteDoc(doc(db, "posts", postId));
   const imageRef = ref(storage, `posts/${postId}/image`);
-  const imageThumbRef = ref(storage, `posts/${postId}/thumb_image`);
+  //  const imageThumbRef = ref(storage, `posts/${postId}/thumb_image`);
   await deleteObject(imageRef);
-  await deleteObject(imageThumbRef);
+  //  await deleteObject(imageThumbRef);
 };
 
 export const likePost = async (postId: string, userId: string) => {

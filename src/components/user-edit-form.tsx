@@ -1,22 +1,16 @@
 "use client";
 
 import { FC, useState } from "react";
-import { updateDoc, doc, deleteField } from "firebase/firestore";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
-import { db, storage } from "@/lib/firebase/firebase";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { IFormData, IFormUserProfileData } from "@/types";
+import { IFormUserProfileData } from "@/types";
 import { editProfile } from "@/actions/user-actions";
+import { deleteImageInStorage, getImageUrl } from "@/lib/firebase/storage";
+import { useUser } from "@/lib/getUser";
 
 interface IProps {
   userId: string;
   currentUsername: string;
-  currentProfilePhoto: string;
+  currentProfilePhoto: string | undefined;
   closeModal: () => void;
 }
 
@@ -26,45 +20,59 @@ const UserEditForm: FC<IProps> = ({
   currentProfilePhoto,
   closeModal,
 }) => {
-  const { register, handleSubmit, setValue, getValues } =
-    useForm<IFormUserProfileData>();
+  const { register, handleSubmit } = useForm<IFormUserProfileData>();
+  const [imagePreview, setImagePreview] = useState<
+    string | ArrayBuffer | null | undefined
+  >(currentProfilePhoto);
   const [loading, setLoading] = useState(false);
 
   const onSubmit: SubmitHandler<IFormUserProfileData> = async (data) => {
     setLoading(true);
     try {
-      await editProfile(userId, data, currentProfilePhoto);
-      // const userRef = doc(db, "users", userId);
-      // let updatedFields: { username?: string; profilePhoto?: string | null } =
-      //   {};
+      let updatedFields: { username?: string; profilePhoto?: string | null } =
+        {};
 
-      // if (data.username) {
-      //   updatedFields.username = data.username;
-      // }
+      if (data.username) {
+        updatedFields.username = data.username;
+      }
 
-      // if (data.image && data.image.length > 0) {
-      //   const imageFile = data.image[0];
-      //   const imageRef = ref(
-      //     storage,
-      //     `profilePhotos/${userId}/${imageFile.name}`
-      //   );
-      //   await uploadBytes(imageRef, imageFile);
-      //   const imageUrl = await getDownloadURL(imageRef);
-      //   updatedFields.profilePhoto = imageUrl;
-      // }
+      if (!data.profilePhoto && !imagePreview && currentProfilePhoto) {
+        updatedFields.profilePhoto = null;
+      }
 
-      // if (currentProfilePhoto && !data.image) {
-      //   const imageRef = ref(storage, currentProfilePhoto);
-      //   await deleteObject(imageRef);
-      //   updatedFields.profilePhoto = deleteField();
-      // }
-
-      // await updateDoc(userRef, updatedFields);
+      if (data.profilePhoto && data.profilePhoto.length > 0) {
+        const imageFile = data.profilePhoto[0];
+        const imagePath = `profilePhotos/${userId}/profilePhoto`;
+        //   const thumbPath = `profilePhotos/${userId}/thumb_profilePhoto`;
+        const imageUrl = await getImageUrl(imagePath, imageFile);
+        updatedFields.profilePhoto = imageUrl;
+      }
+      await editProfile(userId, updatedFields);
       closeModal();
     } catch (error) {
-      console.error("Error updating post:", error);
+      console.error("Error updating profile:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const addProfilePhoto = (e: any) => {
+    const reader = new FileReader();
+    if (e.target.files[0]) {
+      reader.readAsDataURL(e.target.files[0]);
+    }
+
+    reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+      setImagePreview(reader.result);
+    };
+  };
+
+  const deleteProfilePhoto = async () => {
+    setImagePreview(null);
+    if (currentProfilePhoto) {
+      //   const thumbPath = `profilePhotos/${userId}/thumb_profilePhoto`;
+      //  await deleteImageInStorage(currentProfilePhoto, thumbPath);
+      await deleteImageInStorage(currentProfilePhoto);
     }
   };
 
@@ -79,17 +87,17 @@ const UserEditForm: FC<IProps> = ({
       </div>
 
       <div className="form-control">
-        {currentProfilePhoto && (
+        {imagePreview && (
           <div className="relative">
             <img
-              src={currentProfilePhoto}
+              src={imagePreview}
               alt="Current Image"
               className="w-full h-64 object-cover"
             />
             <button
               type="button"
               className="btn btn-sm absolute top-2 right-2"
-              onClick={() => setValue("image", undefined)}
+              onClick={deleteProfilePhoto}
             >
               Delete Photo
             </button>
@@ -97,9 +105,10 @@ const UserEditForm: FC<IProps> = ({
         )}
         <input
           type="file"
-          {...register("image")}
+          {...register("profilePhoto")}
           accept="image/*"
           className="file-input file-input-bordered w-full mt-2"
+          onChange={addProfilePhoto}
         />
       </div>
 

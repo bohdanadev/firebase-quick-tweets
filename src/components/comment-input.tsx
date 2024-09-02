@@ -1,13 +1,5 @@
 "use client";
-import {
-  Dispatch,
-  FC,
-  FormEvent,
-  Fragment,
-  SetStateAction,
-  useEffect,
-  useState,
-} from "react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
 import {
   CalendarIcon,
   ChartBarIcon,
@@ -15,15 +7,12 @@ import {
   PhotoIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { IComment, IPost, IReplyComment, IUser } from "@/types";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-
-import { getUser } from "@/lib/firebase/user";
+import { IComment, IPost, IReplyComment } from "@/types";
 import { createComment, createReplyComment } from "@/actions/post-action";
 import { SubmitHandler, useForm } from "react-hook-form";
-import Image from "next/image";
 import { useUser } from "@/lib/getUser";
+import PickerComponent from "./emoji-picker";
+import avatar from "@/assets/avatar.jpg";
 
 interface IProps {
   post: IPost;
@@ -46,29 +35,11 @@ const CommentInput: FC<IProps> = ({
   setComments,
   postPage,
 }) => {
-  const [userData, setUserData] = useState<IUser | null>(null);
   const { register, handleSubmit, setValue, getValues, reset } =
     useForm<ICommentFormData>();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const { user } = useUser();
-
-  useEffect(() => {
-    if (user) {
-      const fetchUser = async () => {
-        const response = await getUser(user.uid);
-        if (response) {
-          setUserData(response);
-        } else {
-          setUserData(null);
-        }
-      };
-      fetchUser();
-    }
-  }, [user]);
-
-  const name = user?.displayName ?? userData?.username!;
-  const userPhoto = user?.photoURL ?? (userData?.profilePhoto || null);
 
   const addEmoji = (e: any) => {
     let sym = e.unified.split("-");
@@ -87,9 +58,9 @@ const CommentInput: FC<IProps> = ({
     const newComment = await createComment(
       post.id,
       data.comment,
-      user?.uid,
-      name,
-      userPhoto
+      user?.id!,
+      user?.username!,
+      user?.profilePhoto
     );
     if (setComments) {
       setComments((prevState) => [...prevState, newComment]);
@@ -105,9 +76,9 @@ const CommentInput: FC<IProps> = ({
         post.id,
         commentId,
         data.comment,
-        user?.uid,
-        name,
-        userPhoto
+        user?.id!,
+        user?.username!,
+        user?.profilePhoto
       );
       if (setReplies) {
         setReplies((prevState) => [...prevState, newReply]);
@@ -130,14 +101,14 @@ const CommentInput: FC<IProps> = ({
         </div>
       )}
       <div className="mt-5 pl-2 flex space-x-3 w-full ">
-        <Image
-          src={user?.photoURL ?? userData?.profilePhoto}
+        <img
+          src={user?.profilePhoto ?? avatar}
           alt="user"
           width={8}
           height={8}
           className="h-8 w-8 rounded-full"
         />
-        <h4 className="mt-2 pl-2">{user?.displayName ?? userData?.username}</h4>
+        <h4 className="mt-2 pl-2">{user?.username}</h4>
       </div>
       <form
         onSubmit={handleSubmit(
@@ -172,20 +143,7 @@ const CommentInput: FC<IProps> = ({
               <FaceSmileIcon className="text-[#1d9bf0] h-[22px]" />
             </div>
 
-            {showEmojiPicker && (
-              <Picker
-                data={data}
-                onEmojiSelect={addEmoji}
-                style={{
-                  position: "absolute",
-                  marginTop: "465px",
-                  marginLeft: -40,
-                  maxWidth: "320px",
-                  borderRadius: "20px",
-                }}
-                theme="dark"
-              />
-            )}
+            {showEmojiPicker && <PickerComponent onEmojiSelect={addEmoji} />}
 
             <div className="icon">
               <CalendarIcon className="text-[#1d9bf0] h-[22px]" />

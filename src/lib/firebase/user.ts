@@ -1,5 +1,5 @@
 import { app, auth, db, storage } from "@/lib/firebase/firebase";
-import { IFormUserProfileData, IUser } from "@/types";
+import { IUser } from "@/types";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -16,15 +16,8 @@ import {
   updateDoc,
   deleteDoc,
   deleteField,
-  FieldValue,
 } from "firebase/firestore";
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytes,
-  uploadString,
-} from "firebase/storage";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
 
 export const createUser = async (
   username: string,
@@ -48,7 +41,8 @@ export const createUser = async (
       async () => {
         const thumbPhotoRef = ref(
           storage,
-          `profilePhotos/${user.uid}/thumb_profilePhoto`
+          //    `profilePhotos/${user.uid}/thumb_profilePhoto`
+          `profilePhotos/${user.uid}/profilePhoto`
         );
         const avatarUrl = await getDownloadURL(thumbPhotoRef);
         const docRef = doc(db, "users", user.uid);
@@ -87,46 +81,27 @@ export const getUser = async (uid: string) => {
 
 export const updateMyProfile = async (
   id: string,
-  data: IFormUserProfileData,
-  currentProfilePhoto?: string
+  updatedFields: { username?: string; profilePhoto?: string | null }
 ) => {
   const userRef = doc(db, "users", id);
-  let updatedFields: {
-    username?: string;
-    profilePhoto?: string | null | FieldValue;
-  } = {};
-
-  if (data.username) {
-    updatedFields.username = data.username;
+  if (!updatedFields.profilePhoto) {
+    await updateDoc(userRef, { profilePhoto: deleteField(), ...updatedFields });
+  } else {
+    await updateDoc(userRef, updatedFields);
   }
-
-  if (data.image && data.image.length > 0) {
-    const imageFile = data.image[0];
-    const imageRef = ref(storage, `profilePhotos/${id}/$profilePhoto`);
-    await uploadBytes(imageRef, imageFile);
-    const thumbRef = ref(storage, `profilePhotos/${id}/thumb_profilePhoto`);
-    const imageUrl = await getDownloadURL(thumbRef);
-    updatedFields.profilePhoto = imageUrl;
-  }
-
-  if (currentProfilePhoto && data.image) {
-    const imageRef = ref(storage, currentProfilePhoto);
-    await deleteObject(imageRef);
-    //  updatedFields.profilePhoto = deleteField();
-  }
-
-  await updateDoc(userRef, updatedFields);
-
-  await updateProfile(auth.currentUser!, {
-    displayName: updatedFields.username,
-    photoURL: updatedFields.profilePhoto,
-  })
-    .then(() => {
-      console.log("Profile updated");
+  const user = auth.currentUser;
+  if (user) {
+    await updateProfile(user, {
+      displayName: updatedFields.username,
+      photoURL: updatedFields.profilePhoto ? updatedFields.profilePhoto : "",
     })
-    .catch((error) => {
-      console.log("Failed to update profile");
-    });
+      .then(() => {
+        console.log("Profile updated");
+      })
+      .catch((error) => {
+        console.log("Failed to update profile", error);
+      });
+  }
 };
 
 export const deleteAccount = async (id: string) => {

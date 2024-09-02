@@ -10,16 +10,12 @@ import { IUser } from "@/types";
 
 interface IProps {
   userId: string;
-  // searchParams?: Record<string, string> | null | undefined;
 }
 
 const Profile: FC<IProps> = ({ userId }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { user: currentUser } = useUser();
-
-  // const show = searchParams?.show;
-  // const target = searchParams?.target;
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -33,18 +29,13 @@ const Profile: FC<IProps> = ({ userId }) => {
     fetchUser();
   }, [userId]);
 
-  console.log(currentUser?.uid === userId);
-
-  console.log("CURRENT_USER", currentUser);
-  console.log("USER", user);
-
   const userPhoto = user?.profilePhoto ?? avatar;
   return (
     <div className="hero bg-base-400 min-h-700">
       <div className="hero-content flex-col lg:flex-row-reverse">
-        {currentUser?.uid === userId ? (
+        {currentUser?.id === userId ? (
           <Image
-            src={currentUser?.photoURL ?? userPhoto}
+            src={currentUser?.profilePhoto ?? avatar}
             alt="profile photo"
             width={300}
             height={300}
@@ -60,9 +51,9 @@ const Profile: FC<IProps> = ({ userId }) => {
           />
         )}
         <div>
-          {currentUser?.uid === userId ? (
+          {currentUser?.id === userId ? (
             <h1 className="text-3xl font-bold text-base-200">
-              {currentUser?.displayName ?? user?.username}
+              {currentUser?.username}
             </h1>
           ) : (
             <h1 className="text-3xl font-bold text-base-200">
@@ -75,7 +66,7 @@ const Profile: FC<IProps> = ({ userId }) => {
             excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
             a id nisi.
           </p>
-          {currentUser?.uid === userId && (
+          {currentUser?.id === userId && (
             <div className="flex flex-row gap-5">
               <div className="btn btn-neutral" onClick={() => setIsOpen(true)}>
                 Edit Profile
@@ -88,61 +79,13 @@ const Profile: FC<IProps> = ({ userId }) => {
                 isOpen={isOpen}
                 setIsOpen={setIsOpen}
                 target="profile"
-                user={user}
+                user={currentUser}
               />
             </div>
           )}
         </div>
       </div>
     </div>
-
-    /*  <div className="card w-full bg-black shadow-xl p-4">
-      <div className="flex items-center">
-        <div className="avatar">
-          <div className="w-24 rounded-full">
-            {currentUser?.uid === userId ? (
-              <Image
-                src={currentUser?.photoURL ?? userPhoto}
-                width={500}
-                height={500}
-                alt="User Avatar"
-              />
-            ) : (
-              <Image
-                src={userPhoto}
-                width={500}
-                height={500}
-                alt="User Avatar"
-              />
-            )}
-          </div>
-        </div>
-        <div className="ml-4 flex flex-col gap-2">
-          <h2 className="text-2xl font-bold">
-            {currentUser?.uid === userId
-              ? currentUser?.displayName
-              : user?.username}
-          </h2>
-          {currentUser?.uid === userId && (
-            <div className="flex flex-row gap-5">
-              <div className="btn btn-neutral" onClick={() => setIsOpen(true)}>
-                Edit Profile
-              </div>
-
-              <Link href={`/users/change-password`}>
-                <div className="btn btn-neutral">Change Password</div>
-              </Link>
-              <Modal
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
-                target="profile"
-                user={user}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    </div>  */
   );
 };
 

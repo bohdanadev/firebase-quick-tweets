@@ -130,7 +130,7 @@ const Comment: FC<IProps> = ({ comment, post, setComments, postPage }) => {
             {replies && replies.length > 0 && <span>{replies?.length}</span>}
           </div>
 
-          {comment.userId === user?.uid && (
+          {comment.userId === user?.id && (
             <>
               <div
                 className="icon group-hover:bg-pink-600/10"

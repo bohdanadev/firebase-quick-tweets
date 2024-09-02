@@ -15,29 +15,12 @@ import SidebarLink from "./sidebar-link";
 import Link from "next/link";
 import logo from "@/assets/logo.png";
 import { deleteAccount, getUser, signout } from "@/lib/firebase/user";
-import { IUser } from "@/types";
 import { useUser } from "@/lib/getUser";
 import { useRouter } from "next/navigation";
-import avatar from "@/assets/avatar.jpg";
 
 const Sidebar: FC = () => {
-  const [userData, setUserData] = useState<IUser | null>(null);
   const router = useRouter();
   const { user: currentUser } = useUser();
-
-  useEffect(() => {
-    if (currentUser) {
-      const fetchUser = async () => {
-        const response = await getUser(currentUser.uid);
-        if (response) {
-          setUserData(response);
-        } else {
-          setUserData(null);
-        }
-      };
-      fetchUser();
-    }
-  }, [currentUser]);
 
   const logout = async () => {
     await signout()
@@ -49,10 +32,6 @@ const Sidebar: FC = () => {
         throw new Error("Error logging out");
       });
   };
-
-  const userAvatar = currentUser?.photoURL
-    ? currentUser.photoURL
-    : userData?.profilePhoto ?? avatar;
 
   return (
     <div className="hidden sm:flex flex-col items-center xl:items-start xl:w-[340px] p-2 fixed h-full">
@@ -78,9 +57,9 @@ const Sidebar: FC = () => {
           role="button"
           className="text-[#d9d9d9] flex items-center justify-center mt-auto hoverAnimation xl:ml-auto xl:-mr-5"
         >
-          {currentUser?.photoURL || userData?.profilePhoto ? (
+          {currentUser?.profilePhoto ? (
             <Image
-              src={userAvatar}
+              src={currentUser.profilePhoto}
               alt="user"
               width={20}
               height={20}
@@ -90,16 +69,13 @@ const Sidebar: FC = () => {
             <div className="avatar online placeholder">
               <div className="bg-neutral text-neutral-content w-16 rounded-full">
                 <span className="text-xl">
-                  {currentUser?.displayName?.charAt(0).toUpperCase() ??
-                    userData?.username.charAt(0).toUpperCase()}
+                  {currentUser?.username.charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
           )}
           <div className="hidden xl:inline leading-5 mx-2">
-            <h4 className="font-bold">
-              {currentUser?.displayName ?? userData?.username}
-            </h4>
+            <h4 className="font-bold">{currentUser?.username}</h4>
           </div>
         </div>
         <ul
@@ -107,13 +83,13 @@ const Sidebar: FC = () => {
           className="dropdown-content menu bg-neutral-content rounded-box z-[1] w-52 p-2 shadow"
         >
           <li>
-            <Link href={`/users/${currentUser?.uid}`}>
+            <Link href={`/users/${currentUser?.id}`}>
               <p>Edit profile</p>
             </Link>
           </li>
           <li>
             <a>
-              <div onClick={() => deleteAccount(currentUser!.uid)}>
+              <div onClick={() => deleteAccount(currentUser!.id)}>
                 Delete account
               </div>
             </a>

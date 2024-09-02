@@ -20,7 +20,6 @@ export const getTrendings = async () => {
   }
 
   const trendingData = trendingDocSnap.data();
-  console.log("TRENDING DATA", trendingData);
   return trendingData;
 };
 

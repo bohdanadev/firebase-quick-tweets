@@ -18,8 +18,7 @@ export interface IUser {
   id: string;
   username: string;
   email: string;
-  //  profilePhoto?: string | StaticImport | Blob | MediaSource;
-  profilePhoto?: string | StaticImport;
+  profilePhoto?: string;
 }
 
 export interface IReplyComment extends IComment {
@@ -34,15 +33,6 @@ export interface IComment {
   username: string;
   userImg: string;
   timestamp: any;
-  // replies: {
-  //   id: string;
-  //   commentId: string;
-  //   comment: string;
-  //   userId: string;
-  //   username: string;
-  //   userImg: string;
-  //   timestamp: any;
-  // };
   replies: IReplyComment[];
 }
 
@@ -67,7 +57,7 @@ export interface IFormData {
 
 export interface IFormUserProfileData {
   username: string;
-  image?: FileList;
+  profilePhoto?: FileList;
 }
 
 export interface ITrendings {

@@ -1,26 +1,18 @@
 "use client";
 
 import { FC, useState } from "react";
-import { updateDoc, doc, deleteField } from "firebase/firestore";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
-import { db, storage } from "@/lib/firebase/firebase";
 import { SubmitHandler, useForm } from "react-hook-form";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
 import { IFormData } from "@/types";
 import { editPost } from "@/actions/post-action";
-import Image from "next/image";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import PickerComponent from "./emoji-picker";
+import { deleteImageInStorage, getImageUrl } from "@/lib/firebase/storage";
+import Image from "next/image";
 
 interface IPostEditFormProps {
   postId: string;
-  currentText: string;
-  currentImageUrl: string;
+  currentText?: string;
+  currentImageUrl?: string | undefined;
   closeModal: () => void;
 }
 
@@ -33,33 +25,36 @@ const PostEditForm: FC<IPostEditFormProps> = ({
   const { register, handleSubmit, setValue, getValues } = useForm<IFormData>();
   const [loading, setLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [imagePreview, setImagePreview] = useState<
+    string | ArrayBuffer | null | undefined
+  >(currentImageUrl);
 
   const onSubmit: SubmitHandler<IFormData> = async (data) => {
     setLoading(true);
     try {
-      await editPost(postId, data, currentText, currentImageUrl);
-      //    const postRef = doc(db, "posts", postId);
-      //    let updatedFields: { text?: string; imageUrl?: string | null } = {};
+      let updatedFields: { text?: string; image?: string | null } = {};
 
-      //    if (data.text) {
-      //      updatedFields.text = data.text;
-      //    }
+      if (data.text && data.text !== currentText) {
+        updatedFields.text = data.text;
+      }
 
-      //    if (data.image && data.image.length > 0) {
-      //      const imageFile = data.image[0];
-      //      const imageRef = ref(storage, `posts/${postId}/${imageFile.name}`);
-      //      await uploadBytes(imageRef, imageFile);
-      //      const imageUrl = await getDownloadURL(imageRef);
-      //      updatedFields.imageUrl = imageUrl;
-      //    }
+      if (!data.image && !imagePreview && currentImageUrl) {
+        //   const thumbPath = `posts/${postId}/thumb_image`;
+        //  await deleteImageInStorage(currentImageUrl, thumbPath);
 
-      //    if (currentImageUrl && !data.image) {
-      //      const imageRef = ref(storage, currentImageUrl);
-      //      await deleteObject(imageRef);
-      //      updatedFields.imageUrl = deleteField();
-      //    }
+        updatedFields.image = null;
+      }
 
-      //    await updateDoc(postRef, updatedFields);
+      if (data.image && data.image.length > 0) {
+        const imageFile = data.image[0];
+        const imagePath = `posts/${postId}/image`;
+        //   const thumbPath = `posts/${postId}/thumb_image`;
+        //   const imageUrl = await getImageUrl(imagePath, imageFile, thumbPath);
+        const imageUrl = await getImageUrl(imagePath, imageFile);
+        updatedFields.image = imageUrl;
+      }
+      await editPost(postId, updatedFields);
+
       closeModal();
     } catch (error) {
       console.error("Error updating post:", error);
@@ -81,6 +76,26 @@ const PostEditForm: FC<IPostEditFormProps> = ({
     });
   };
 
+  const addImage = (e: any) => {
+    const reader = new FileReader();
+    if (e.target.files[0]) {
+      reader.readAsDataURL(e.target.files[0]);
+    }
+
+    reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+      setImagePreview(reader.result);
+    };
+  };
+
+  const deleteImage = async () => {
+    setImagePreview(null);
+    if (currentImageUrl) {
+      //   const thumbPath = `posts/${postId}/thumb_image`;
+      //  await deleteImageInStorage(currentImageUrl, thumbPath);
+      await deleteImageInStorage(currentImageUrl);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="form-control">
@@ -98,28 +113,15 @@ const PostEditForm: FC<IPostEditFormProps> = ({
           >
             😊 Add Emoji
           </button>
-          {showEmojiPicker && (
-            <Picker
-              data={data}
-              onEmojiSelect={addEmoji}
-              style={{
-                position: "absolute",
-                marginTop: "465px",
-                marginLeft: -40,
-                maxWidth: "320px",
-                borderRadius: "20px",
-              }}
-              theme="dark"
-            />
-          )}
+          {showEmojiPicker && <PickerComponent onEmojiSelect={addEmoji} />}
         </div>
       </div>
 
       <div className="form-control">
-        {currentImageUrl && (
+        {imagePreview && (
           <div className="relative">
             <Image
-              src={currentImageUrl}
+              src={imagePreview}
               alt="Current Image"
               width={300}
               height={256}
@@ -128,7 +130,7 @@ const PostEditForm: FC<IPostEditFormProps> = ({
             <button
               type="button"
               className="btn btn-sm absolute top-2 right-2"
-              onClick={() => setValue("image", undefined)}
+              onClick={deleteImage}
             >
               <XMarkIcon className="text-red-500 h-[22px] color-red-500" />
             </button>
@@ -139,6 +141,7 @@ const PostEditForm: FC<IPostEditFormProps> = ({
           {...register("image")}
           accept="image/*"
           className="file-input file-input-bordered w-full mt-2"
+          onChange={addImage}
         />
       </div>
 

@@ -41,8 +41,8 @@ const Modal: FC<IProps> = ({ isOpen, setIsOpen, target, post, user }) => {
                 closeModal={handleCloseModal}
               />
             )}
-            <button className="btn" onClick={() => setIsOpen(false)}>
-              Cancel
+            <button className="btn" onClick={handleCloseModal}>
+              Close
             </button>
           </div>
         </div>

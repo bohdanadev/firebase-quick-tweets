@@ -7,9 +7,9 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
-  signInAnonymously,
 } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export function onAuthStateChanged(cb) {
   return _onAuthStateChanged(auth, cb);
@@ -19,7 +19,16 @@ export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
 
   try {
-    await signInWithPopup(auth, provider);
+    await signInWithPopup(auth, provider).then(async (result) => {
+      const user = result.user;
+      const docRef = doc(db, "users", user.uid);
+      await setDoc(docRef, {
+        username: user.displayName,
+        profilePhoto: user.photoURL,
+        email: user.email,
+        status: "online",
+      });
+    });
   } catch (error) {
     console.error("Error signing in with Google", error);
   }

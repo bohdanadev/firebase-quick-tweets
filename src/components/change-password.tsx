@@ -31,7 +31,6 @@ const ChangePassword: FC = () => {
       setError("User not authenticated.");
       return;
     }
-    console.log("CURRENT", data);
 
     try {
       await reauth(data?.currentPassword);

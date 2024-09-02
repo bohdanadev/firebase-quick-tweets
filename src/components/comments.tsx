@@ -3,21 +3,14 @@ import Comment from "./comment";
 import CommentInput from "./comment-input";
 import { IComment, IPost } from "@/types";
 import { ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/outline";
-import { User } from "firebase/auth";
 
 interface IProps {
   post: IPost;
   comments: IComment[];
-  user: User | null;
   setComments: Dispatch<SetStateAction<IComment[]>>;
 }
 
-const CommentsComponent: FC<IProps> = ({
-  post,
-  comments,
-  user,
-  setComments,
-}) => {
+const CommentsComponent: FC<IProps> = ({ post, comments, setComments }) => {
   return (
     <div className="dropdown dropdown-bottom">
       <div

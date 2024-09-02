@@ -1,15 +1,8 @@
 "use client";
-import React, {
-  ChangeEvent,
-  Dispatch,
-  FC,
-  SetStateAction,
-  useState,
-} from "react";
+import React, { ChangeEvent, FC, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface IProps {
-  // setSearchText: Dispatch<SetStateAction<string | null>>;
   handleSearch: any;
 }
 
@@ -19,7 +12,6 @@ const Search: FC<IProps> = ({ handleSearch }) => {
     e.preventDefault();
     setValue(e.target.value);
     setTimeout(() => {
-      //  setSearchText(e.target.value);
       handleSearch(e.target.value);
     }, 1000);
   };

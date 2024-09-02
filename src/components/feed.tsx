@@ -22,7 +22,7 @@ const Feed: FC = () => {
       if (currentUser) {
         try {
           const { posts, lastVisibleId } = showMyPosts
-            ? await getPosts(pageSize, undefined, currentUser.uid)
+            ? await getPosts(pageSize, undefined, currentUser.id)
             : await getPosts(pageSize);
           setInitialPosts([...posts]);
           setLastDocId(lastVisibleId);
@@ -46,8 +46,6 @@ const Feed: FC = () => {
     setInitialPosts([...filteredPosts.posts]);
   };
 
-  console.log("INITIAAL", initialPosts);
-
   return (
     <div className="flex-grow border-l border-r border-gray-700 max-w-2xl sm:ml-[73px] xl:ml-[370px]">
       <div className="sticky top-0 z-50 bg-black border-b border-gray-700">
@@ -69,7 +67,7 @@ const Feed: FC = () => {
             <SparklesIcon className="h-5 text-white" />
           </div>
         </div>
-        <PostInput currentUser={currentUser} />
+        <PostInput />
       </div>
 
       <div className="overflow-y-auto h-[calc(100vh-150px)]">

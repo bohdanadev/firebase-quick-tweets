@@ -6,19 +6,13 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ChangeEvent, FC, useEffect, useRef, useState } from "react";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-//import "emoji-mart/css/emoji-mart.css";
-import { IUser } from "@/types";
 import { createPost } from "@/actions/post-action";
 import avatar from "@/assets/avatar.jpg";
 import Image from "next/image";
 import { useUser } from "@/lib/getUser";
-import { getUser } from "@/lib/firebase/user";
+import PickerComponent from "./emoji-picker";
 
 const PostInput: FC = () => {
-  const [userData, setUserData] = useState<IUser | null>(null);
-
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<string | ArrayBuffer | null>(
@@ -29,30 +23,14 @@ const PostInput: FC = () => {
 
   const { user: currentUser } = useUser();
 
-  useEffect(() => {
-    if (currentUser) {
-      const fetchUser = async () => {
-        const response = await getUser(currentUser.uid);
-        if (response) {
-          setUserData(response);
-        } else {
-          setUserData(null);
-        }
-      };
-      fetchUser();
-    }
-  }, [currentUser]);
-
-  const userAvatar = userData?.profilePhoto ?? avatar;
-
   const sendPost = async () => {
     if (loading) return;
     setLoading(true);
     if (currentUser) {
       await createPost(
-        currentUser.uid,
-        currentUser.displayName ?? userData?.username,
-        currentUser.photoURL ?? userData?.profilePhoto,
+        currentUser.id,
+        currentUser.username,
+        currentUser.profilePhoto ?? "",
         input,
         selectedFile
       );
@@ -90,7 +68,7 @@ const PostInput: FC = () => {
       }`}
     >
       <Image
-        src={currentUser?.photoURL ?? userAvatar}
+        src={currentUser?.profilePhoto ?? avatar}
         alt="avatar"
         width={11}
         height={11}
@@ -152,20 +130,7 @@ const PostInput: FC = () => {
                 <CalendarIcon className="text-[#1d9bf0] h-[22px]" />
               </div>
 
-              {showEmojis && (
-                <Picker
-                  data={data}
-                  onEmojiSelect={addEmoji}
-                  style={{
-                    position: "absolute",
-                    marginTop: "465px",
-                    marginLeft: -40,
-                    maxWidth: "320px",
-                    borderRadius: "20px",
-                  }}
-                  theme="dark"
-                />
-              )}
+              {showEmojis && <PickerComponent onEmojiSelect={addEmoji} />}
             </div>
             <button
               className="bg-teal-400 text-white rounded-full px-4 py-1.5 font-bold shadow-md hover:opacity-100 disabled:hover:bg-[#1d9bf0] disabled:opacity-50 disabled:cursor-default"

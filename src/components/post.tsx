@@ -52,20 +52,20 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
   }, [id]);
 
   useEffect(() => {
-    const isLike = post.likes.findIndex((like) => like === user?.uid) !== -1;
+    const isLike = post.likes.findIndex((like) => like === user?.id) !== -1;
     setLiked(isLike);
-  }, [post.likes, user?.uid]);
+  }, [post.likes, user?.id]);
 
   const likePostHandler = async () => {
     if (!liked) {
-      await likePostAction(id, user?.uid!);
-      if (!likes.includes(user?.uid!)) {
-        setLikes((prevState) => [...prevState, user?.uid!]);
+      await likePostAction(id, user?.id!);
+      if (!likes.includes(user?.id!)) {
+        setLikes((prevState) => [...prevState, user?.id!]);
         setLiked(true);
       }
     } else {
-      await unlikePostAction(id, user?.uid!);
-      setLikes((prevState) => prevState.filter((like) => like !== user?.uid));
+      await unlikePostAction(id, user?.id!);
+      setLikes((prevState) => prevState.filter((like) => like !== user?.id));
       setLiked(false);
     }
   };
@@ -139,9 +139,9 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             <Image
               src={post.image}
               alt="postImage"
-              width={500}
-              height={500}
-              className="rounded-2xl max-h-[500px] object-cover mr-2 position-relative"
+              width={300}
+              height={300}
+              className="rounded-2xl object-cover mr-2 position-relative"
             />
           </Link>
         )}
@@ -155,12 +155,11 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             <CommentsComponent
               post={post}
               comments={comments}
-              user={user}
               setComments={setComments}
             />
           )}
 
-          {user?.uid === post.userId ? (
+          {user?.id === post.userId ? (
             <div
               className="flex items-center space-x-1 group"
               onClick={deletePostHandler}
@@ -202,7 +201,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
           <div className="icon group">
             <ShareIcon className="h-5 group-hover:text-[#1d9bf0]" />
           </div>
-          {postPage && post.userId === user?.uid && (
+          {postPage && post.userId === user?.id && (
             <div className="icon group" onClick={() => setIsOpen(true)}>
               <PencilSquareIcon className="h-5 group-hover:text-[#1d9bf0]" />
             </div>
