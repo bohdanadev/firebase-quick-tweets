@@ -5,7 +5,7 @@ import Sidebar from "@/components/sidebar";
 import Widgets from "@/components/widgets";
 import DataLoading from "../loading";
 
-const PostsPage: FC = async () => {
+const PostsPage: FC = () => {
   return (
     <div className="">
       <div className="bg-black min-h-screen flex max-w-[1500px] mx-auto">
@@ -13,7 +13,9 @@ const PostsPage: FC = async () => {
         <Suspense fallback={<DataLoading />}>
           <Feed />
         </Suspense>
-        <Widgets />
+        <Suspense fallback={<DataLoading />}>
+          <Widgets />
+        </Suspense>
       </div>
     </div>
   );

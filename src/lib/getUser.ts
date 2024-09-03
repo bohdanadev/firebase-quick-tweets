@@ -1,16 +1,18 @@
 "use client";
 
-import { onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "./firebase/firebase";
 import { getUser } from "./firebase/user";
 import { IUser } from "@/types";
+import { app } from "./firebase/firebase";
 
 export const useUser = () => {
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const auth = getAuth(app);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -24,7 +26,7 @@ export const useUser = () => {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [auth, router]);
 
   return { user, loading };
 };

@@ -1,7 +1,8 @@
+import { FC } from "react";
 import ChangePassword from "@/components/change-password";
 import ProtectedRoute from "@/components/protected-route";
 
-const ChangePasswordPage = () => {
+const ChangePasswordPage: FC = () => {
   return (
     <ProtectedRoute>
       <ChangePassword />
