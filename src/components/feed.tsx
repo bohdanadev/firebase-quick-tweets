@@ -11,7 +11,7 @@ import Search from "./search";
 
 const Feed: FC = () => {
   const [initialPosts, setInitialPosts] = useState<IPost[] | null>(null);
-  const [lastDocId, setLastDocId] = useState<string | null>(null);
+  const [lastDocId, setLastDocId] = useState<string>();
   const [showMyPosts, setShowMyPosts] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>();
   const { user: currentUser } = useUser();
@@ -76,9 +76,9 @@ const Feed: FC = () => {
           <Suspense fallback={<DataLoading />}>
             <PostsSection
               initialPosts={initialPosts}
-              lastVisible={lastDocId}
+              lastVisible={lastDocId!}
               text={searchText}
-              showMy={showMyPosts}
+              showMyPosts={showMyPosts}
             />
           </Suspense>
         )}

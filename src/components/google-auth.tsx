@@ -1,10 +1,10 @@
-import React, { FC, MouseEventHandler } from "react";
+import React, { FC, MouseEvent } from "react";
 import { signInWithGoogle } from "@/lib/firebase/auth";
 import google from "@/assets/google.jpg";
 import Image from "next/image";
 
 export const GoogleAuth: FC = () => {
-  const handleSignIn = (e: any) => {
+  const handleSignIn = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     signInWithGoogle();
   };

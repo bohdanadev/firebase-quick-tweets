@@ -6,6 +6,7 @@ import { IFormUserProfileData } from "@/types";
 import { editProfile } from "@/actions/user-actions";
 import { deleteImageInStorage, getImageUrl } from "@/lib/firebase/storage";
 import { useUser } from "@/lib/getUser";
+import Image from "next/image";
 
 interface IProps {
   userId: string;
@@ -21,9 +22,7 @@ const UserEditForm: FC<IProps> = ({
   closeModal,
 }) => {
   const { register, handleSubmit } = useForm<IFormUserProfileData>();
-  const [imagePreview, setImagePreview] = useState<
-    string | ArrayBuffer | null | undefined
-  >(currentProfilePhoto);
+  const [imagePreview, setImagePreview] = useState<any>(currentProfilePhoto);
   const [loading, setLoading] = useState(false);
 
   const onSubmit: SubmitHandler<IFormUserProfileData> = async (data) => {
@@ -89,7 +88,7 @@ const UserEditForm: FC<IProps> = ({
       <div className="form-control">
         {imagePreview && (
           <div className="relative">
-            <img
+            <Image
               src={imagePreview}
               alt="Current Image"
               className="w-full h-64 object-cover"

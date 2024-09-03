@@ -13,6 +13,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useUser } from "@/lib/getUser";
 import PickerComponent from "./emoji-picker";
 import avatar from "@/assets/avatar.jpg";
+import Image from "next/image";
 
 interface IProps {
   post: IPost;
@@ -55,13 +56,13 @@ const CommentInput: FC<IProps> = ({
   };
 
   const addCommentHandler: SubmitHandler<ICommentFormData> = async (data) => {
-    const newComment = await createComment(
+    const newComment = (await createComment(
       post.id,
       data.comment,
       user?.id!,
       user?.username!,
       user?.profilePhoto
-    );
+    )) as IComment;
     if (setComments) {
       setComments((prevState) => [...prevState, newComment]);
     }
@@ -72,14 +73,14 @@ const CommentInput: FC<IProps> = ({
     data
   ) => {
     if (commentId) {
-      const newReply = await createReplyComment(
+      const newReply = (await createReplyComment(
         post.id,
         commentId,
         data.comment,
         user?.id!,
         user?.username!,
         user?.profilePhoto
-      );
+      )) as IReplyComment;
       if (setReplies) {
         setReplies((prevState) => [...prevState, newReply]);
       }
@@ -101,7 +102,7 @@ const CommentInput: FC<IProps> = ({
         </div>
       )}
       <div className="mt-5 pl-2 flex space-x-3 w-full ">
-        <img
+        <Image
           src={user?.profilePhoto ?? avatar}
           alt="user"
           width={8}

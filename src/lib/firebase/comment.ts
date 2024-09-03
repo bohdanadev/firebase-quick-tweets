@@ -58,7 +58,11 @@ export const addComment = async (
   await updateDoc(doc(db, "posts", postId), {
     commentsCount: increment(1),
   });
-  return (await getDoc(docRef)).data();
+  const newComment = await getDoc(docRef);
+  const id = newComment.id;
+  const data = newComment.data() as Omit<IComment, "id">;
+  const timestamp = newComment.data()?.timestamp.toDate();
+  return { id, ...data, timestamp };
 };
 
 export const addReplyToComment = async (
@@ -83,7 +87,11 @@ export const addReplyToComment = async (
   await updateDoc(doc(db, "posts", postId), {
     commentsCount: increment(1),
   });
-  return (await getDoc(docRef)).data();
+  const newReply = await getDoc(docRef);
+  const id = newReply.id;
+  const data = newReply.data() as Omit<IReplyComment, "id">;
+  const timestamp = newReply.data()?.timestamp.toDate();
+  return { id, ...data, timestamp };
 };
 
 export const deleteCommentWithReplies = async (

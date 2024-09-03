@@ -31,7 +31,7 @@ export const createUser = async (
     password
   );
   const user = userCredential.user;
-  // sendEmailVerification(user);
+  sendEmailVerification(user);
   if (selectedFile) {
     const profilePhotoRef = ref(
       storage,

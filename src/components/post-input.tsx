@@ -15,9 +15,7 @@ import PickerComponent from "./emoji-picker";
 const PostInput: FC = () => {
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedFile, setSelectedFile] = useState<string | ArrayBuffer | null>(
-    null
-  );
+  const [selectedFile, setSelectedFile] = useState<any>(null);
   const [showEmojis, setShowEmojis] = useState<boolean>(false);
   const filePickerRef = useRef(null);
 
@@ -42,21 +40,21 @@ const PostInput: FC = () => {
     setShowEmojis(false);
   };
 
-  const addImageToPost = (e) => {
+  const addImageToPost = (e: any) => {
     const reader = new FileReader();
     if (e.target.files[0]) {
       reader.readAsDataURL(e.target.files[0]);
     }
 
     reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
-      setSelectedFile(readerEvent.target.result);
+      setSelectedFile(readerEvent.target!.result);
     };
   };
 
-  const addEmoji = (e) => {
+  const addEmoji = (e: any) => {
     let sym = e.unified.split("-");
     let codesArray: any = [];
-    sym.forEach((el) => codesArray.push("0x" + el));
+    sym.forEach((el: string) => codesArray.push("0x" + el));
     let emoji = String.fromCodePoint(...codesArray);
     setInput(input + emoji);
   };
@@ -94,7 +92,7 @@ const PostInput: FC = () => {
               >
                 <XMarkIcon className="text-white h-5" />
               </div>
-              <img
+              <Image
                 src={selectedFile}
                 alt=""
                 className="rounded-2xl max-h-80 object-contain"
@@ -107,6 +105,7 @@ const PostInput: FC = () => {
             <div className="flex items-center">
               <div
                 className="icon"
+                //@ts-ignore
                 onClick={() => filePickerRef.current.click()}
               >
                 <PhotoIcon className="text-[#1d9bf0] h-[22px]" />

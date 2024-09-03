@@ -11,7 +11,7 @@ import {
 import { auth, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
 
-export function onAuthStateChanged(cb) {
+export function onAuthStateChanged(cb: any) {
   return _onAuthStateChanged(auth, cb);
 }
 

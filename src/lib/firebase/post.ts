@@ -34,7 +34,7 @@ type FiltersType = {
   username?: string;
 };
 
-function applyQueryFilters(q, { text, username }: FiltersType) {
+function applyQueryFilters(q: any, { text, username }: FiltersType) {
   if (text) {
     q = query(q, where("text", "==", text));
   }
@@ -115,7 +115,7 @@ export const addPost = async (
   username: string,
   profilePhoto: string,
   input: string,
-  selectedFile: string | ArrayBuffer | null
+  selectedFile: any
 ) => {
   const docRef = await addDoc(collection(db, "posts"), {
     userId,
