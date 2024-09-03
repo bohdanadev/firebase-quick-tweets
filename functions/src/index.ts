@@ -5,7 +5,6 @@ import { getStorage } from "firebase-admin/storage";
 import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
 import * as path from "path";
-
 import sharp from "sharp";
 import { firestore } from "firebase-admin";
 
