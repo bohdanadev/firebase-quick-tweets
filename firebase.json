@@ -14,12 +14,13 @@
     }
   ],
   "hosting": {
-    "public": "out",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**",
-      "**/functions/**"
+    "public": ".next/server",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "function": "nextApp"
+      }
     ]
   },
   "emulators": {
@@ -35,7 +36,13 @@
     "ui": {
       "enabled": true
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    },
+    "hosting": {
+      "port": 5000
+    }
   },
   "storage": {
     "rules": "storage.rules"

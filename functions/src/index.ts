@@ -6,7 +6,7 @@ import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
 import * as path from "path";
 
-import sharp = require("sharp");
+import sharp from "sharp";
 import { firestore } from "firebase-admin";
 
 initializeApp();
