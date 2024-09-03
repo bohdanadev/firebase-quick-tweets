@@ -2,18 +2,36 @@
 env:
   - variable: NEXT_PUBLIC_STORAGE_BUCKET
     value: storageBucketSecret
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: NEXT_PUBLIC_API_KEY
     secret: apiKeySecret
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: NEXT_PUBLIC_APP_ID
     secret: appIdSecret
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: NEXT_PUBLIC_AUTH_DOMAIN
     secret: authDomainSecret
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: NEXT_PUBLIC_MESSAGING_SENDER_ID
     secret: messagingSenderIdSecret
+    availability:
+      - BUILD
+      - RUNTIME
 
   - variable: NEXT_PUBLIC_PROJECT_ID
     secret: projectIdSecret
+    availability:
+      - BUILD
+      - RUNTIME
