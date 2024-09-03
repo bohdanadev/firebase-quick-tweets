@@ -128,7 +128,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
                   >
                     <XMarkIcon className="text-white h-5" />
                   </div>
-                  <img
+                  <Image
                     src={selectedFile}
                     alt=""
                     className="rounded-2xl max-h-80 object-contain"
