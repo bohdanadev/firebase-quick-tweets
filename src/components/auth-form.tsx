@@ -1,5 +1,5 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, FormEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
@@ -35,7 +35,7 @@ const AuthForm: FC<IProps> = ({ mode }) => {
 
   const { user: currentUser } = useUser();
 
-  const addAvatar = (e) => {
+  const addAvatar = (e: any) => {
     const reader = new FileReader();
     if (e.target.files[0]) {
       reader.readAsDataURL(e.target.files[0]);

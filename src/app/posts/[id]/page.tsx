@@ -34,7 +34,12 @@ const PostPage: FC<IProps> = async ({ params: { id } }) => {
         {post.comments.length > 0 && (
           <div className="pb-72">
             {post.comments.map((comment) => (
-              <Comment key={comment.id} id={comment.id} comment={comment} />
+              <Comment
+                key={comment.id}
+                comment={comment}
+                post={post}
+                setComments={() => {}}
+              />
             ))}
           </div>
         )}

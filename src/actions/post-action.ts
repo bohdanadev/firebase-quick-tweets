@@ -20,7 +20,7 @@ export async function createPost(
   username: string,
   profilePhoto: string,
   input: string,
-  selectedFile: string | ArrayBuffer | null
+  selectedFile: any
 ) {
   try {
     await addPost(userId, username, profilePhoto, input, selectedFile);
@@ -108,7 +108,7 @@ export async function deletePost(postId: string) {
     revalidatePath("/posts", "page");
     revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {
-    throw new Error("Failed delete post", error);
+    throw new Error("Failed delete post");
   }
 }
 
