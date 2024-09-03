@@ -8,8 +8,8 @@ import DataLoading from "@/app/loading";
 import { useUser } from "@/lib/getUser";
 
 interface IProps {
-  initialPosts: IPost[];
-  lastVisible: string;
+  initialPosts?: IPost[];
+  lastVisible?: string;
   userId?: string;
   text?: string;
   showMyPosts?: boolean;
@@ -22,16 +22,30 @@ const PostsSection: FC<IProps> = ({
   text,
   showMyPosts,
 }) => {
-  const [posts, setPosts] = useState<IPost[]>(initialPosts);
-  const [lastDoc, setLastDoc] = useState<string>(lastVisible);
+  const [posts, setPosts] = useState<IPost[]>(initialPosts ?? []);
+  const [lastDoc, setLastDoc] = useState<string | undefined>(
+    lastVisible ?? undefined
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
   const { user } = useUser();
 
   useEffect(() => {
-    setPosts(initialPosts);
-  }, [initialPosts]);
+    const fetchPosts = async () => {
+      const pageSize = 4;
+      const { posts: initialPosts, lastVisibleId } = await getPosts(
+        pageSize,
+        undefined,
+        userId
+      );
+      setPosts(initialPosts);
+      setLastDoc(lastVisibleId);
+    };
+    if (userId) {
+      fetchPosts();
+    }
+  }, [userId]);
 
   const loadPosts = async () => {
     setLoading(true);
@@ -61,7 +75,9 @@ const PostsSection: FC<IProps> = ({
   return (
     <div className="mt-4 pb-72 h-full scroll-smooth scroll-ml-0">
       {posts &&
-        posts.map((post) => <Post key={post.id} id={post.id} post={post} />)}
+        posts.map((post) => (
+          <Post key={post.id} id={post.id} mappedPost={post} />
+        ))}
       {loading && <DataLoading />}
       {!loading && posts.length > 0 && hasMore ? (
         <button

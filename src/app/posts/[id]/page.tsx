@@ -3,9 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import Sidebar from "@/components/sidebar";
 import Post from "@/components/post";
 import Widgets from "@/components/widgets";
-import Comment from "@/components/comment";
 import Link from "next/link";
-import { getPost } from "@/lib/firebase/post";
 
 interface IProps {
   params: {
@@ -14,8 +12,6 @@ interface IProps {
 }
 
 const PostPage: FC<IProps> = async ({ params: { id } }) => {
-  const post = await getPost(id);
-
   return (
     <div className="bg-black flex min-h-screen max-w-[1500px] mx-auto">
       <Sidebar />
@@ -30,19 +26,7 @@ const PostPage: FC<IProps> = async ({ params: { id } }) => {
           Tweet
         </div>
 
-        <Post id={id} post={post} postPage={true} />
-        {post.comments.length > 0 && (
-          <div className="pb-72">
-            {post.comments.map((comment) => (
-              <Comment
-                key={comment.id}
-                comment={comment}
-                post={post}
-                setComments={() => {}}
-              />
-            ))}
-          </div>
-        )}
+        <Post id={id} postPage={true} />
       </div>
       <Widgets />
     </div>

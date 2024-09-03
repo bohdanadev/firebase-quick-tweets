@@ -29,20 +29,35 @@ import { getComments } from "@/lib/firebase/comment";
 import CommentsComponent from "./comments";
 import Comment from "./comment";
 import CommentInput from "./comment-input";
+import { getPost } from "@/lib/firebase/post";
 
 interface IProps {
   id: string;
-  post: IPost;
+  mappedPost?: IPost;
   postPage?: boolean;
 }
 
-const Post: FC<IProps> = ({ id, post, postPage }) => {
+const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
+  const [post, setPost] = useState<IPost | null>(mappedPost ?? null);
   const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(post.likes);
+  const [likes, setLikes] = useState<string[]>(mappedPost?.likes ?? []);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [comments, setComments] = useState<IComment[]>([]);
   const router = useRouter();
   const { user } = useUser();
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      const fetchedPost = await getPost(id);
+      if (fetchedPost) {
+        setPost(fetchedPost);
+        setLikes(fetchedPost.likes);
+      }
+    };
+    if (!mappedPost) {
+      fetchPost();
+    }
+  }, [id, mappedPost]);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -52,14 +67,14 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
   }, [id]);
 
   useEffect(() => {
-    const isLike = post.likes.findIndex((like) => like === user?.id) !== -1;
+    const isLike = likes?.findIndex((like) => like === user?.id) !== -1;
     setLiked(isLike);
-  }, [post.likes, user?.id]);
+  }, [likes, user?.id]);
 
   const likePostHandler = async () => {
     if (!liked) {
       await likePostAction(id, user?.id!);
-      if (!likes.includes(user?.id!)) {
+      if (!likes?.includes(user?.id!)) {
         setLikes((prevState) => [...prevState, user?.id!]);
         setLiked(true);
       }
@@ -78,9 +93,9 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
   return (
     <div className="p-3 flex cursor-pointer border-b border-gray-700">
       {!postPage && (
-        <Link href={`/users/${post.userId}`} className="flex justify-center">
+        <Link href={`/users/${post?.userId}`} className="flex justify-center">
           <Image
-            src={post.userImg ?? avatar}
+            src={post?.userImg ?? avatar}
             alt="userAvatar"
             width={11}
             height={11}
@@ -91,9 +106,9 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
       <div className="flex flex-col space-y-2 w-full">
         <div className={`flex ${!postPage && "justify-between"}`}>
           {postPage && (
-            <Link href={`/users/${post.userId}`}>
+            <Link href={`/users/${post?.userId}`}>
               <Image
-                src={post.userImg ?? avatar}
+                src={post?.userImg ?? avatar}
                 alt="Profile Pic"
                 width={11}
                 height={11}
@@ -102,25 +117,25 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             </Link>
           )}
           <div className="text-[#6e767d]">
-            <Link href={`/users/${post.userId}`}>
+            <Link href={`/users/${post?.userId}`}>
               <div className="inline-block group">
                 <h4
                   className={`font-bold text-[15px] sm:text-base text-[#d9d9d9] group-hover:underline ${
                     !postPage && "inline-block"
                   }`}
                 >
-                  {post.username}
+                  {post?.username}
                 </h4>
               </div>
             </Link>
             ·{" "}
             <span className="hover:underline text-sm sm:text-[15px]">
-              <Moment fromNow>{post.timestamp}</Moment>
+              <Moment fromNow>{post?.timestamp}</Moment>
             </span>
             {!postPage && (
               <Link href={`/posts/${id}`}>
                 <p className="text-gray-400 text-[15px] sm:text-base mt-0.5 text-justify">
-                  {post.text}
+                  {post?.text}
                 </p>
               </Link>
             )}
@@ -131,10 +146,10 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
         </div>
         {postPage && (
           <p className="text-gray-400 mt-0.5 text-m text-justify">
-            {post.text}
+            {post?.text}
           </p>
         )}
-        {post.image && (
+        {post?.image && (
           <Link href={`/posts/${id}`} className="flex justify-center">
             <Image
               src={post.image}
@@ -151,7 +166,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             postPage && "mx-auto"
           }`}
         >
-          {!postPage && (
+          {post && !postPage && (
             <CommentsComponent
               post={post}
               comments={comments}
@@ -159,7 +174,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
             />
           )}
 
-          {user?.id === post.userId ? (
+          {user?.id === post?.userId ? (
             <div
               className="flex items-center space-x-1 group"
               onClick={deletePostHandler}
@@ -201,7 +216,7 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
           <div className="icon group">
             <ShareIcon className="h-5 group-hover:text-[#1d9bf0]" />
           </div>
-          {postPage && post.userId === user?.id && (
+          {postPage && post?.userId === user?.id && (
             <div className="icon group" onClick={() => setIsOpen(true)}>
               <PencilSquareIcon className="h-5 group-hover:text-[#1d9bf0]" />
             </div>
@@ -210,7 +225,8 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
         {postPage && (
           <div>
             <div className="divider divider-neutral"></div>
-            {comments &&
+            {post &&
+              comments &&
               comments.map((comment) => (
                 <Comment
                   key={comment.id}
@@ -220,15 +236,24 @@ const Post: FC<IProps> = ({ id, post, postPage }) => {
                   postPage={true}
                 />
               ))}
-            <CommentInput
-              post={post}
-              setComments={setComments}
-              postPage={true}
-            />
+            {post && (
+              <CommentInput
+                post={post}
+                setComments={setComments}
+                postPage={true}
+              />
+            )}
           </div>
         )}
       </div>
-      <Modal isOpen={isOpen} setIsOpen={setIsOpen} target="post" post={post} />
+      {post && (
+        <Modal
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          target="post"
+          post={post}
+        />
+      )}
     </div>
   );
 };

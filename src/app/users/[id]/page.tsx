@@ -2,7 +2,6 @@ import PostsSection from "@/components/posts-section";
 import Profile from "@/components/profile";
 import Sidebar from "@/components/sidebar";
 import Widgets from "@/components/widgets";
-import { getPosts } from "@/lib/firebase/post";
 import { FC } from "react";
 
 interface IProps {
@@ -12,13 +11,6 @@ interface IProps {
 }
 
 const UserPage: FC<IProps> = async ({ params: { id } }) => {
-  const pageSize = 3;
-  const { posts: initialPosts, lastVisibleId } = await getPosts(
-    pageSize,
-    undefined,
-    id
-  );
-
   return (
     <div className="bg-black min-h-screen flex max-w-[1500px] mx-auto h-full">
       <div className="w-1/4">
@@ -29,11 +21,7 @@ const UserPage: FC<IProps> = async ({ params: { id } }) => {
         <Profile userId={id} />
         <div className="divider divider-neutral"></div>
 
-        <PostsSection
-          initialPosts={initialPosts}
-          userId={id}
-          lastVisible={lastVisibleId}
-        />
+        <PostsSection userId={id} />
       </div>
       <div className="w-1/4 ml-4">
         <Widgets />
