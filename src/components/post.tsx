@@ -97,8 +97,9 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
           <Image
             src={post?.userImg ?? avatar}
             alt="userAvatar"
-            width={11}
-            height={11}
+            width={44}
+            height={44}
+            quality={85}
             className="h-11 w-11 rounded-full mr-4"
           />
         </Link>
@@ -110,8 +111,9 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
               <Image
                 src={post?.userImg ?? avatar}
                 alt="Profile Pic"
-                width={11}
-                height={11}
+                width={44}
+                height={44}
+                quality={85}
                 className="h-11 w-11 rounded-full mr-4 max-h-[500px]"
               />
             </Link>
@@ -174,7 +176,7 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
             />
           )}
 
-          {user?.id === post?.userId ? (
+          {postPage && user?.id === post?.userId ? (
             <div
               className="flex items-center space-x-1 group"
               onClick={deletePostHandler}

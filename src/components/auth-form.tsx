@@ -131,6 +131,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
                   <Image
                     src={selectedFile}
                     alt=""
+                    width={100}
+                    height={80}
                     className="rounded-2xl max-h-80 object-contain"
                   />
                 </div>

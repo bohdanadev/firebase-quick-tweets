@@ -8,8 +8,8 @@ export const editProfile = async (
 ) => {
   try {
     await updateMyProfile(id, updatedFields);
-    revalidatePath("/user/${id}", "page");
   } catch (error) {
     throw new Error("Failed to update profile");
   }
+  revalidatePath(`/user/${id}`, "page");
 };

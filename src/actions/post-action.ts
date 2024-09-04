@@ -24,10 +24,10 @@ export async function createPost(
 ) {
   try {
     await addPost(userId, username, profilePhoto, input, selectedFile);
-    revalidatePath("/posts", "page");
   } catch (error) {
     throw new Error("Create post failed");
   }
+  revalidatePath("/posts", "page");
 }
 
 export async function createComment(
@@ -80,12 +80,10 @@ export async function editPost(
 ) {
   try {
     await updatePost(postId, updatedFields);
-
-    revalidatePath(`/posts/${postId}`, "page");
-    revalidatePath("/posts", "page");
   } catch (error) {
     throw new Error("Failed edit post");
   }
+  revalidatePath(`/posts/${postId}`, "page");
 }
 
 export async function editComment(
@@ -105,11 +103,11 @@ export async function editComment(
 export async function deletePost(postId: string) {
   try {
     await deletePostWithComments(postId);
-    revalidatePath("/posts", "page");
-    revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {
-    throw new Error("Failed delete post");
+    console.log(error);
   }
+  // revalidatePath("/posts", "page");
+  revalidatePath(`/posts/${postId}`, "page");
 }
 
 export async function deleteComment(postId: string, commentId: string) {

@@ -68,9 +68,10 @@ const PostInput: FC = () => {
       <Image
         src={currentUser?.profilePhoto ?? avatar}
         alt="avatar"
-        width={11}
-        height={11}
-        className="h-11 w-11 rounded-full cursor-pointer"
+        width={44}
+        height={44}
+        quality={80}
+        className="w-11 h-11 rounded-full cursor-pointer"
       />
       <div className="divide-y divide-gray-700 w-full">
         <div className={`${selectedFile && "pb-7"} ${input && "space-y-2.5"}`}>
@@ -95,7 +96,9 @@ const PostInput: FC = () => {
               <Image
                 src={selectedFile}
                 alt=""
-                className="rounded-2xl max-h-80 object-contain"
+                width={300}
+                height={300}
+                className="rounded-2xl max-w-80 max-h-80 object-contain"
               />
             </div>
           )}

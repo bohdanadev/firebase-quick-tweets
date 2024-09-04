@@ -14,8 +14,8 @@ const Reply: FC<IProps> = ({ reply }) => {
       <Image
         src={reply.userImg ?? avatar}
         alt="user"
-        width={8}
-        height={8}
+        width={32}
+        height={32}
         className="h-8 w-8 rounded-full"
       />
       <div className="flex flex-col space-y-2 w-full">

@@ -91,7 +91,9 @@ const UserEditForm: FC<IProps> = ({
             <Image
               src={imagePreview}
               alt="Current Image"
-              className="w-full h-64 object-cover"
+              width={300}
+              height={260}
+              className="object-cover"
             />
             <button
               type="button"

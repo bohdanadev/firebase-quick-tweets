@@ -105,8 +105,9 @@ const CommentInput: FC<IProps> = ({
         <Image
           src={user?.profilePhoto ?? avatar}
           alt="user"
-          width={8}
-          height={8}
+          width={32}
+          height={32}
+          quality={85}
           className="h-8 w-8 rounded-full"
         />
         <h4 className="mt-2 pl-2">{user?.username}</h4>

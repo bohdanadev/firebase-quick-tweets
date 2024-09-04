@@ -169,26 +169,44 @@ export const updatePost = async (
   }
 };
 
-const deleteCommentReplies = async (postId: string, commentId: string) => {
-  const qR = query(
-    collection(db, "posts", postId, "comments", commentId, "replies")
-  );
-  const replyQuerySnapshot = await getDocs(qR);
-  if (!replyQuerySnapshot.empty) {
-    replyQuerySnapshot.forEach(async (reply) => {
-      await deleteDoc(
-        doc(db, "posts", postId, "comments", commentId, "replies", reply.id)
-      );
-    });
-  }
-};
+//const deleteCommentReplies = async (postId: string, commentId: string) => {
+//  const qR = query(
+//    collection(db, "posts", postId, "comments", commentId, "replies")
+//  );
+//  const replyQuerySnapshot = await getDocs(qR);
+//  if (!replyQuerySnapshot.empty) {
+//    replyQuerySnapshot.forEach(async (reply) => {
+//      await deleteDoc(
+//        doc(db, "posts", postId, "comments", commentId, "replies", reply.id)
+//      );
+//    });
+//  }
+//};
 
 export const deletePostWithComments = async (postId: string) => {
   const q = query(collection(db, "posts", postId, "comments"));
   const querySnapshot = await getDocs(q);
   if (!querySnapshot.empty) {
     querySnapshot.forEach(async (comment) => {
-      await deleteCommentReplies(postId, comment.id);
+      const qR = query(
+        collection(db, "posts", postId, "comments", comment.id, "replies")
+      );
+      const replyQuerySnapshot = await getDocs(qR);
+      if (!replyQuerySnapshot.empty) {
+        replyQuerySnapshot.forEach(async (reply) => {
+          await deleteDoc(
+            doc(
+              db,
+              "posts",
+              postId,
+              "comments",
+              comment.id,
+              "replies",
+              reply.id
+            )
+          );
+        });
+      }
       await deleteDoc(doc(db, "posts", postId, "comments", comment.id));
     });
   }

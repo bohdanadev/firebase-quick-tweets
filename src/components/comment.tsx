@@ -62,8 +62,9 @@ const Comment: FC<IProps> = ({ comment, post, setComments, postPage }) => {
       <Image
         src={comment.userImg ?? avatar}
         alt=""
-        width={8}
-        height={8}
+        width={32}
+        height={32}
+        quality={85}
         className="h-8 w-8 rounded-full mr-4"
       />
       <div className="flex flex-col space-y-2 w-full">

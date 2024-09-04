@@ -31,7 +31,6 @@ export const createUser = async (
     password
   );
   const user = userCredential.user;
-  sendEmailVerification(user);
   if (selectedFile) {
     const profilePhotoRef = ref(
       storage,
@@ -41,20 +40,23 @@ export const createUser = async (
       async () => {
         const thumbPhotoRef = ref(
           storage,
-          //    `profilePhotos/${user.uid}/thumb_profilePhoto`
+          //`profilePhotos/${user.uid}/thumb_profilePhoto`
           `profilePhotos/${user.uid}/profilePhoto`
         );
         const avatarUrl = await getDownloadURL(thumbPhotoRef);
-        const docRef = doc(db, "users", user.uid);
-        return await setDoc(docRef, {
-          username,
-          profilePhoto: avatarUrl,
-          email: email,
-          status: "online",
-        });
+        if (avatarUrl) {
+          const docRef = doc(db, "users", user.uid);
+          await setDoc(docRef, {
+            username,
+            profilePhoto: avatarUrl,
+            email: email,
+            status: "online",
+          });
+        }
       }
     );
   }
+  await sendEmailVerification(user);
 };
 
 export const signin = async (email: string, password: string) => {

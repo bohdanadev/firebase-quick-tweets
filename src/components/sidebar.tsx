@@ -61,8 +61,9 @@ const Sidebar: FC = () => {
             <Image
               src={currentUser.profilePhoto}
               alt="user"
-              width={20}
-              height={20}
+              width={80}
+              height={80}
+              quality={80}
               className="h-20 w-20 rounded-full xl:mr-2.5"
             />
           ) : (
