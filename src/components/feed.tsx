@@ -1,49 +1,21 @@
 "use client";
 import { SparklesIcon } from "@heroicons/react/24/outline";
-import { FC, Suspense, useEffect, useState } from "react";
+import { FC, Suspense, useState } from "react";
 import PostInput from "./post-input";
-import { getPosts } from "@/lib/firebase/post";
-import { IPost } from "@/types";
 import PostsSection from "./posts-section";
-import { useUser } from "@/lib/getUser";
 import DataLoading from "@/app/loading";
 import Search from "./search";
 
 const Feed: FC = () => {
-  const [initialPosts, setInitialPosts] = useState<IPost[] | null>(null);
-  const [lastDocId, setLastDocId] = useState<string>();
   const [showMyPosts, setShowMyPosts] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>();
-  const { user: currentUser } = useUser();
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const pageSize = 4;
-      if (currentUser) {
-        try {
-          const { posts, lastVisibleId } = showMyPosts
-            ? await getPosts(pageSize, undefined, currentUser.id)
-            : await getPosts(pageSize);
-          setInitialPosts([...posts]);
-          setLastDocId(lastVisibleId);
-        } catch (error) {
-          console.error("Error fetching posts:", error);
-        }
-      }
-    };
-
-    fetchPosts();
-  }, [showMyPosts, currentUser]);
 
   const handleCheck = () => {
     setShowMyPosts((prev) => !prev);
   };
 
   const handleSearch = async (searchTerm: string) => {
-    const filteredPosts = await getPosts(10, undefined, undefined, {
-      text: searchTerm,
-    });
-    setInitialPosts([...filteredPosts.posts]);
+    setSearchText(searchTerm);
   };
 
   return (
@@ -72,16 +44,9 @@ const Feed: FC = () => {
 
       <div className="overflow-y-auto h-[calc(100vh-150px)]">
         {" "}
-        {initialPosts && (
-          <Suspense fallback={<DataLoading />}>
-            <PostsSection
-              initialPosts={initialPosts}
-              lastVisible={lastDocId!}
-              text={searchText}
-              showMyPosts={showMyPosts}
-            />
-          </Suspense>
-        )}
+        <Suspense fallback={<DataLoading />}>
+          <PostsSection searchTerm={searchText} showMyPosts={showMyPosts} />
+        </Suspense>
       </div>
     </div>
   );

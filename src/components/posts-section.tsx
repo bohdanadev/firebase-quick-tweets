@@ -8,24 +8,14 @@ import DataLoading from "@/app/loading";
 import { useUser } from "@/lib/getUser";
 
 interface IProps {
-  initialPosts?: IPost[];
-  lastVisible?: string;
   userId?: string;
-  text?: string;
+  searchTerm?: string;
   showMyPosts?: boolean;
 }
 
-const PostsSection: FC<IProps> = ({
-  initialPosts,
-  lastVisible,
-  userId,
-  text,
-  showMyPosts,
-}) => {
-  const [posts, setPosts] = useState<IPost[]>(initialPosts ?? []);
-  const [lastDoc, setLastDoc] = useState<string | undefined>(
-    lastVisible ?? undefined
-  );
+const PostsSection: FC<IProps> = ({ userId, searchTerm, showMyPosts }) => {
+  const [posts, setPosts] = useState<IPost[]>([]);
+  const [lastDoc, setLastDoc] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
@@ -34,18 +24,36 @@ const PostsSection: FC<IProps> = ({
   useEffect(() => {
     const fetchPosts = async () => {
       const pageSize = 4;
-      const { posts: initialPosts, lastVisibleId } = await getPosts(
-        pageSize,
-        undefined,
-        userId
-      );
-      setPosts(initialPosts);
-      setLastDoc(lastVisibleId);
+      if (showMyPosts && user) {
+        const { posts, lastVisibleId } = await getPosts(
+          pageSize,
+          undefined,
+          user.id
+        );
+
+        setPosts([...posts]);
+        setLastDoc(lastVisibleId);
+      } else if (userId) {
+        const { posts: initialPosts, lastVisibleId } = await getPosts(
+          pageSize,
+          undefined,
+          userId
+        );
+        setPosts(...[initialPosts]);
+        setLastDoc(lastVisibleId);
+      } else if (searchTerm) {
+        const filteredPosts = await getPosts(pageSize, undefined, undefined, {
+          text: searchTerm,
+        });
+        setPosts([...filteredPosts.posts]);
+      } else {
+        const { posts, lastVisibleId } = await getPosts(pageSize);
+        setPosts([...posts]);
+        setLastDoc(lastVisibleId);
+      }
     };
-    if (userId) {
-      fetchPosts();
-    }
-  }, [userId]);
+    fetchPosts();
+  }, [searchTerm, showMyPosts, user, userId]);
 
   const loadPosts = async () => {
     setLoading(true);
@@ -55,12 +63,14 @@ const PostsSection: FC<IProps> = ({
       let results;
       if (userId || showMyPosts) {
         const userIdForFetch = showMyPosts ? user?.id : userId;
-        results = text
-          ? await getPosts(pageSize, lastDoc, userIdForFetch, { text })
+        results = searchTerm
+          ? await getPosts(pageSize, lastDoc, userIdForFetch, {
+              text: searchTerm,
+            })
           : await getPosts(pageSize, lastDoc, userIdForFetch);
       } else {
-        results = text
-          ? await getPosts(pageSize, lastDoc, undefined, { text })
+        results = searchTerm
+          ? await getPosts(pageSize, lastDoc, undefined, { text: searchTerm })
           : await getPosts(pageSize, lastDoc);
       }
       setPosts((prevPosts) => [...prevPosts, ...results.posts]);
