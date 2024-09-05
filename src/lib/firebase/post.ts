@@ -140,6 +140,14 @@ export const addPost = async (
       });
     });
   }
+  // const docSnap = await getDoc(docRef);
+  // if (docSnap.exists()) {
+  //   const id = docSnap.id;
+  //   const data = docSnap.data() as Omit<IPost, "id">;
+  //   const timestamp = docSnap.data().timestamp.toDate();
+  //
+  //   return { id, ...data, timestamp };
+  // }
 };
 
 export const getPost = async (postId: string) => {

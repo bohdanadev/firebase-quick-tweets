@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://my-web-app--quick-tweets.us-central1.hosted.app/"],
+    "method": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "responseHeader": ["Content-Type", "Authorization"],
+    "maxAgeSeconds": 3600
+  }
+]

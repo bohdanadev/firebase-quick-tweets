@@ -12,7 +12,7 @@ const Reply: FC<IProps> = ({ reply }) => {
   return (
     <div className="w-full m-1">
       <Image
-        src={reply.userImg ?? avatar}
+        src={reply.userImg !== "" ? reply.userImg : avatar}
         alt="user"
         width={32}
         height={32}

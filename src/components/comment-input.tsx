@@ -61,7 +61,7 @@ const CommentInput: FC<IProps> = ({
       data.comment,
       user?.id!,
       user?.username!,
-      user?.profilePhoto
+      user?.profilePhoto ?? ""
     )) as IComment;
     if (setComments) {
       setComments((prevState) => [...prevState, newComment]);
@@ -79,7 +79,7 @@ const CommentInput: FC<IProps> = ({
         data.comment,
         user?.id!,
         user?.username!,
-        user?.profilePhoto
+        user?.profilePhoto ?? ""
       )) as IReplyComment;
       if (setReplies) {
         setReplies((prevState) => [...prevState, newReply]);

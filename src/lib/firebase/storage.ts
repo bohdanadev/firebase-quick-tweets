@@ -23,6 +23,7 @@ export const deleteImageInStorage = async (
   //   thumbPath: string
 ) => {
   const currentImageRef = ref(storage, currentImageUrl);
+
   try {
     await deleteObject(currentImageRef);
     console.log("Image Deleted");

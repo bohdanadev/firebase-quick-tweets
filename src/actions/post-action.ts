@@ -24,10 +24,10 @@ export async function createPost(
 ) {
   try {
     await addPost(userId, username, profilePhoto, input, selectedFile);
+    revalidatePath("/posts", "page");
   } catch (error) {
     throw new Error("Create post failed");
   }
-  revalidatePath("/posts", "page");
 }
 
 export async function createComment(
@@ -80,10 +80,10 @@ export async function editPost(
 ) {
   try {
     await updatePost(postId, updatedFields);
+    revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {
     throw new Error("Failed edit post");
   }
-  revalidatePath(`/posts/${postId}`, "page");
 }
 
 export async function editComment(
@@ -92,9 +92,8 @@ export async function editComment(
   text: string
 ) {
   try {
-    await updateComment(postId, commentId, text);
-    revalidatePath(`/posts/${postId}`, "page");
-    revalidatePath("/posts", "page");
+    const newComment = await updateComment(postId, commentId, text);
+    return newComment;
   } catch (error) {
     throw new Error("Failed edit comment");
   }
@@ -106,15 +105,12 @@ export async function deletePost(postId: string) {
   } catch (error) {
     console.log(error);
   }
-  // revalidatePath("/posts", "page");
   revalidatePath(`/posts/${postId}`, "page");
 }
 
 export async function deleteComment(postId: string, commentId: string) {
   try {
     await deleteCommentWithReplies(postId, commentId);
-    revalidatePath("/posts", "page");
-    revalidatePath(`/posts/${postId}`, "page");
   } catch (error) {
     throw new Error("Failed delete comment");
   }
@@ -122,12 +118,12 @@ export async function deleteComment(postId: string, commentId: string) {
 
 export async function likePostAction(postId: string, userId: string) {
   await likePost(postId, userId);
-  revalidatePath("/posts", "page");
-  revalidatePath(`/posts/${postId}`, "page");
+  // revalidatePath("/posts", "page");
+  // revalidatePath(`/posts/${postId}`, "page");
 }
 
 export async function unlikePostAction(postId: string, userId: string) {
   await unlikePost(postId, userId);
-  revalidatePath("/posts", "page");
-  revalidatePath(`/posts/${postId}`, "page");
+  // revalidatePath("/posts", "page");
+  // revalidatePath(`/posts/${postId}`, "page");
 }

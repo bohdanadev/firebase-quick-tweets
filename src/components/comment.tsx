@@ -46,7 +46,12 @@ const Comment: FC<IProps> = ({ comment, post, setComments, postPage }) => {
   };
 
   const handleEditSubmit = async () => {
-    await editComment(post.id, comment.id, editedText);
+    const newComment = await editComment(post.id, comment.id, editedText);
+    setComments((prevComments) =>
+      prevComments.map((comment) =>
+        comment.id === newComment.id ? newComment : comment
+      )
+    );
     setEditingCommentId(null);
     setEditedText("");
   };
@@ -60,8 +65,8 @@ const Comment: FC<IProps> = ({ comment, post, setComments, postPage }) => {
   return (
     <div className="p-3 flex cursor-pointer border-b border-gray-700 w-full">
       <Image
-        src={comment.userImg ?? avatar}
-        alt=""
+        src={comment.userImg !== "" ? comment.userImg : avatar}
+        alt="user"
         width={32}
         height={32}
         quality={85}

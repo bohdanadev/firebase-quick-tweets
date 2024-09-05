@@ -15,6 +15,7 @@ import {
 } from "@/lib/validators/auth-form.validation";
 import { createUser, signin } from "@/lib/firebase/user";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { signupUser } from "@/actions/auth-action";
 
 interface IProps {
   mode: string;
@@ -33,8 +34,6 @@ const AuthForm: FC<IProps> = ({ mode }) => {
 
   const router = useRouter();
 
-  const { user: currentUser } = useUser();
-
   const addAvatar = (e: any) => {
     const reader = new FileReader();
     if (e.target.files[0]) {
@@ -51,12 +50,8 @@ const AuthForm: FC<IProps> = ({ mode }) => {
     router.push("/posts");
   };
   const authSignupHandler: SubmitHandler<IAuth> = async (data) => {
-    try {
-      await createUser(data.username, selectedFile, data.email, data.password);
-      router.push("/?mode=login");
-    } catch (error) {
-      console.error("Error registering user:", error);
-    }
+    await signupUser(data.username, selectedFile, data.email, data.password);
+    router.push("/?mode=login");
   };
 
   return (

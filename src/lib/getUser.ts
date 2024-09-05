@@ -18,7 +18,9 @@ export const useUser = () => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const userData = await getUser(currentUser.uid);
-        setUser(userData);
+        if (userData) {
+          setUser(userData);
+        }
       } else {
         setUser(null);
         router.push("/?mode=login");

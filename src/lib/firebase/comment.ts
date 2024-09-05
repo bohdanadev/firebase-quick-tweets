@@ -119,7 +119,13 @@ export const updateComment = async (
   commentId: string,
   text: string
 ) => {
-  await updateDoc(doc(db, "posts", postId, "comments", commentId), {
+  const docRef = doc(db, "posts", postId, "comments", commentId);
+  await updateDoc(docRef, {
     comment: text,
   });
+  const newComment = await getDoc(docRef);
+  const id = newComment.id;
+  const data = newComment.data() as Omit<IComment, "id">;
+  const timestamp = newComment.data()?.timestamp.toDate();
+  return { id, ...data, timestamp };
 };

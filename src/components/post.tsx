@@ -1,5 +1,11 @@
 "use client";
-import React, { FC, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import {
   ArrowsRightLeftIcon,
   EllipsisHorizontalIcon,
@@ -35,9 +41,10 @@ interface IProps {
   id: string;
   mappedPost?: IPost;
   postPage?: boolean;
+  setPosts?: Dispatch<SetStateAction<IPost[]>>;
 }
 
-const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
+const Post: FC<IProps> = ({ id, postPage, mappedPost, setPosts }) => {
   const [post, setPost] = useState<IPost | null>(mappedPost ?? null);
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState<string[]>(mappedPost?.likes ?? []);
@@ -45,6 +52,8 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
   const [comments, setComments] = useState<IComment[]>([]);
   const router = useRouter();
   const { user } = useUser();
+
+  console.log(user);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -87,7 +96,12 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
 
   const deletePostHandler = async () => {
     await deletePost(id);
-    router.push("/posts");
+    if (setPosts) {
+      setPosts((prevPosts) => prevPosts.filter((item) => item.id !== id));
+    }
+    if (postPage) {
+      router.push("/posts");
+    }
   };
 
   return (
@@ -95,7 +109,7 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
       {!postPage && (
         <Link href={`/users/${post?.userId}`} className="flex justify-center">
           <Image
-            src={post?.userImg ?? avatar}
+            src={post?.userImg !== "" ? post?.userImg! : avatar}
             alt="userAvatar"
             width={44}
             height={44}
@@ -109,7 +123,7 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
           {postPage && (
             <Link href={`/users/${post?.userId}`}>
               <Image
-                src={post?.userImg ?? avatar}
+                src={post?.userImg !== "" ? post?.userImg! : avatar}
                 alt="Profile Pic"
                 width={44}
                 height={44}
@@ -176,7 +190,7 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost }) => {
             />
           )}
 
-          {postPage && user?.id === post?.userId ? (
+          {user?.id === post?.userId ? (
             <div
               className="flex items-center space-x-1 group"
               onClick={deletePostHandler}

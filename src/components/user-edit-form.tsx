@@ -5,7 +5,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { IFormUserProfileData } from "@/types";
 import { editProfile } from "@/actions/user-actions";
 import { deleteImageInStorage, getImageUrl } from "@/lib/firebase/storage";
-import { useUser } from "@/lib/getUser";
 import Image from "next/image";
 
 interface IProps {
@@ -69,9 +68,15 @@ const UserEditForm: FC<IProps> = ({
   const deleteProfilePhoto = async () => {
     setImagePreview(null);
     if (currentProfilePhoto) {
-      //   const thumbPath = `profilePhotos/${userId}/thumb_profilePhoto`;
-      //  await deleteImageInStorage(currentProfilePhoto, thumbPath);
+      const thumbPath = `profilePhotos/${userId}/thumb_profilePhoto`;
+      // await deleteImageInStorage(currentProfilePhoto, thumbPath);
       await deleteImageInStorage(currentProfilePhoto);
+      //    const user = auth.currentUser;
+      //    if(user) {
+      //    await updateProfile(user, {
+      //     // displayName: updatedFields.username,
+      //      photoURL: "",
+      //    })
     }
   };
 

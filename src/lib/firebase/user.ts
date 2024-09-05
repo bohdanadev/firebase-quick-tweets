@@ -18,6 +18,7 @@ import {
   deleteField,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { deleteImageInStorage } from "./storage";
 
 export const createUser = async (
   username: string,
@@ -31,7 +32,7 @@ export const createUser = async (
     password
   );
   const user = userCredential.user;
-  if (selectedFile) {
+  if (user && selectedFile) {
     const profilePhotoRef = ref(
       storage,
       `profilePhotos/${user.uid}/profilePhoto`
@@ -84,10 +85,14 @@ export const getUser = async (uid: string) => {
 export const updateMyProfile = async (
   id: string,
   updatedFields: { username?: string; profilePhoto?: string | null }
+  // updatedFields: { username?: string}
 ) => {
   const userRef = doc(db, "users", id);
   if (!updatedFields.profilePhoto) {
-    await updateDoc(userRef, { profilePhoto: deleteField(), ...updatedFields });
+    await updateDoc(userRef, {
+      username: updatedFields.username,
+      profilePhoto: deleteField(),
+    });
   } else {
     await updateDoc(userRef, updatedFields);
   }
@@ -95,7 +100,8 @@ export const updateMyProfile = async (
   if (user) {
     await updateProfile(user, {
       displayName: updatedFields.username,
-      photoURL: updatedFields.profilePhoto ? updatedFields.profilePhoto : "",
+      // photoURL: updatedFields.profilePhoto ? updatedFields.profilePhoto : "",
+      photoURL: updatedFields.profilePhoto,
     })
       .then(() => {
         console.log("Profile updated");
@@ -106,7 +112,10 @@ export const updateMyProfile = async (
   }
 };
 
-export const deleteAccount = async (id: string) => {
+export const deleteAccount = async (user: IUser) => {
   await auth.currentUser?.delete();
-  await deleteDoc(doc(db, "users", id));
+  await deleteDoc(doc(db, "users", user.id));
+  if (user.profilePhoto) {
+    await deleteImageInStorage(user.profilePhoto);
+  }
 };

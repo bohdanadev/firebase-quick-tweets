@@ -86,7 +86,12 @@ const PostsSection: FC<IProps> = ({ userId, searchTerm, showMyPosts }) => {
     <div className="mt-4 pb-72 h-full scroll-smooth scroll-ml-0">
       {posts &&
         posts.map((post) => (
-          <Post key={post.id} id={post.id} mappedPost={post} />
+          <Post
+            key={post.id}
+            id={post.id}
+            mappedPost={post}
+            setPosts={setPosts}
+          />
         ))}
       {loading && <DataLoading />}
       {!loading && posts.length > 0 && hasMore ? (

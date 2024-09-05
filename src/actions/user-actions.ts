@@ -1,5 +1,5 @@
+"use server";
 import { updateMyProfile } from "@/lib/firebase/user";
-import { IFormUserProfileData } from "@/types";
 import { revalidatePath } from "next/cache";
 
 export const editProfile = async (
@@ -8,8 +8,8 @@ export const editProfile = async (
 ) => {
   try {
     await updateMyProfile(id, updatedFields);
+    revalidatePath(`/user/${id}`, "page");
   } catch (error) {
     throw new Error("Failed to update profile");
   }
-  revalidatePath(`/user/${id}`, "page");
 };

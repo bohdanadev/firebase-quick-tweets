@@ -90,7 +90,7 @@ const Sidebar: FC = () => {
           </li>
           <li>
             <a>
-              <div onClick={() => deleteAccount(currentUser!.id)}>
+              <div onClick={() => deleteAccount(currentUser)}>
                 Delete account
               </div>
             </a>
