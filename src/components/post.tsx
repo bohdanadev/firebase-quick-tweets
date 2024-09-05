@@ -53,8 +53,6 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost, setPosts }) => {
   const router = useRouter();
   const { user } = useUser();
 
-  console.log(user);
-
   useEffect(() => {
     const fetchPost = async () => {
       const fetchedPost = await getPost(id);

@@ -1,5 +1,5 @@
 "use client";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import Image from "next/image";
 import { HomeIcon } from "@heroicons/react/24/solid";
 import {
@@ -17,6 +17,7 @@ import logo from "@/assets/logo.png";
 import { deleteAccount, getUser, signout } from "@/lib/firebase/user";
 import { useUser } from "@/lib/getUser";
 import { useRouter } from "next/navigation";
+import { deleteUser } from "@/actions/user-actions";
 
 const Sidebar: FC = () => {
   const router = useRouter();
@@ -31,6 +32,12 @@ const Sidebar: FC = () => {
         console.error("Error logging out:", error);
         throw new Error("Error logging out");
       });
+  };
+
+  const deleteAccountHandler = async () => {
+    if (currentUser) {
+      await deleteUser(currentUser);
+    }
   };
 
   return (
@@ -90,9 +97,7 @@ const Sidebar: FC = () => {
           </li>
           <li>
             <a>
-              <div onClick={() => deleteAccount(currentUser)}>
-                Delete account
-              </div>
+              <div onClick={deleteAccountHandler}>Delete account</div>
             </a>
           </li>
           <li>

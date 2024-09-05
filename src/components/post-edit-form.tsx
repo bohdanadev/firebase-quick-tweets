@@ -27,6 +27,15 @@ const PostEditForm: FC<IPostEditFormProps> = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [imagePreview, setImagePreview] = useState<any>(currentImageUrl);
 
+  const deleteImage = async () => {
+    setImagePreview(null);
+    if (currentImageUrl) {
+      //   const thumbPath = `posts/${postId}/thumb_image`;
+      //  await deleteImageInStorage(currentImageUrl, thumbPath);
+      await deleteImageInStorage(currentImageUrl);
+    }
+  };
+
   const onSubmit: SubmitHandler<IFormData> = async (data) => {
     setLoading(true);
     try {
@@ -36,20 +45,31 @@ const PostEditForm: FC<IPostEditFormProps> = ({
         updatedFields.text = data.text;
       }
 
-      if (!data.image && !imagePreview && currentImageUrl) {
-        //   const thumbPath = `posts/${postId}/thumb_image`;
-        //  await deleteImageInStorage(currentImageUrl, thumbPath);
-
-        updatedFields.image = null;
-      }
+      //  if (!data.image && !imagePreview && currentImageUrl) {
+      //    //   const thumbPath = `posts/${postId}/thumb_image`;
+      //    //  await deleteImageInStorage(currentImageUrl, thumbPath);
+      //
+      //    updatedFields.image = null;
+      //  }
+      //
+      //  if (data.image && data.image.length > 0) {
+      //    const imageFile = data.image[0];
+      //    const imagePath = `posts/${postId}/image`;
+      //    //   const thumbPath = `posts/${postId}/thumb_image`;
+      //    //   const imageUrl = await getImageUrl(imagePath, imageFile, thumbPath);
+      //    const imageUrl = await getImageUrl(imagePath, imageFile);
+      //    updatedFields.image = imageUrl;
+      //  }
 
       if (data.image && data.image.length > 0) {
         const imageFile = data.image[0];
         const imagePath = `posts/${postId}/image`;
-        //   const thumbPath = `posts/${postId}/thumb_image`;
-        //   const imageUrl = await getImageUrl(imagePath, imageFile, thumbPath);
         const imageUrl = await getImageUrl(imagePath, imageFile);
         updatedFields.image = imageUrl;
+      } else if (!data.image && imagePreview === null && currentImageUrl) {
+        updatedFields.image = null;
+      } else if (!data.image && currentImageUrl && imagePreview) {
+        updatedFields.image = currentImageUrl;
       }
       await editPost(postId, updatedFields);
 
@@ -83,15 +103,6 @@ const PostEditForm: FC<IPostEditFormProps> = ({
     reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
       setImagePreview(reader.result);
     };
-  };
-
-  const deleteImage = async () => {
-    setImagePreview(null);
-    if (currentImageUrl) {
-      //   const thumbPath = `posts/${postId}/thumb_image`;
-      //  await deleteImageInStorage(currentImageUrl, thumbPath);
-      await deleteImageInStorage(currentImageUrl);
-    }
   };
 
   return (

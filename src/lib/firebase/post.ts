@@ -170,26 +170,15 @@ export const updatePost = async (
   updatedFields: { text?: string; image?: string | null }
 ) => {
   const postRef = doc(db, "posts", postId);
-  if (!updatedFields.image) {
-    return await updateDoc(postRef, { image: deleteField(), ...updatedFields });
+  if (updatedFields.image === null) {
+    return await updateDoc(postRef, {
+      image: deleteField(),
+      text: updatedFields.text,
+    });
   } else {
     return await updateDoc(postRef, updatedFields);
   }
 };
-
-//const deleteCommentReplies = async (postId: string, commentId: string) => {
-//  const qR = query(
-//    collection(db, "posts", postId, "comments", commentId, "replies")
-//  );
-//  const replyQuerySnapshot = await getDocs(qR);
-//  if (!replyQuerySnapshot.empty) {
-//    replyQuerySnapshot.forEach(async (reply) => {
-//      await deleteDoc(
-//        doc(db, "posts", postId, "comments", commentId, "replies", reply.id)
-//      );
-//    });
-//  }
-//};
 
 export const deletePostWithComments = async (postId: string) => {
   const q = query(collection(db, "posts", postId, "comments"));

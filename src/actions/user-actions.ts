@@ -1,5 +1,6 @@
 "use server";
-import { updateMyProfile } from "@/lib/firebase/user";
+import { deleteAccount, updateMyProfile } from "@/lib/firebase/user";
+import { IUser } from "@/types";
 import { revalidatePath } from "next/cache";
 
 export const editProfile = async (
@@ -11,5 +12,13 @@ export const editProfile = async (
     revalidatePath(`/user/${id}`, "page");
   } catch (error) {
     throw new Error("Failed to update profile");
+  }
+};
+
+export const deleteUser = async (user: IUser) => {
+  try {
+    await deleteAccount(user);
+  } catch (error) {
+    console.log(error);
   }
 };

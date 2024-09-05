@@ -113,8 +113,16 @@ export const updateMyProfile = async (
 };
 
 export const deleteAccount = async (user: IUser) => {
-  await auth.currentUser?.delete();
-  await deleteDoc(doc(db, "users", user.id));
+  try {
+    await auth.currentUser?.delete();
+  } catch (error) {
+    console.error("Failed delete user");
+  }
+  try {
+    await deleteDoc(doc(db, "users", user.id));
+  } catch (error) {
+    console.error("Failed delete userProfile");
+  }
   if (user.profilePhoto) {
     await deleteImageInStorage(user.profilePhoto);
   }

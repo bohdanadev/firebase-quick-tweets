@@ -71,12 +71,6 @@ const UserEditForm: FC<IProps> = ({
       const thumbPath = `profilePhotos/${userId}/thumb_profilePhoto`;
       // await deleteImageInStorage(currentProfilePhoto, thumbPath);
       await deleteImageInStorage(currentProfilePhoto);
-      //    const user = auth.currentUser;
-      //    if(user) {
-      //    await updateProfile(user, {
-      //     // displayName: updatedFields.username,
-      //      photoURL: "",
-      //    })
     }
   };
 
