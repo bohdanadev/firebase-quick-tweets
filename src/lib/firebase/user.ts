@@ -57,7 +57,7 @@ export const createUser = async (
       }
     );
   }
-  await sendEmailVerification(user);
+  // await sendEmailVerification(user);
 };
 
 export const signin = async (email: string, password: string) => {
