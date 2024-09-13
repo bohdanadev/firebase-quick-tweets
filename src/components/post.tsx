@@ -99,6 +99,7 @@ const Post: FC<IProps> = ({ id, postPage, mappedPost, setPosts }) => {
     }
     if (postPage) {
       router.push("/posts");
+      router.refresh();
     }
   };
 
